@@ -13,6 +13,7 @@
 // See the License for the specific language governing permissions and      //
 // limitations under the License.                                           //
 // ======================================================================== //
+
 /*
   Copyright (c) 2010-2011, Intel Corporation
   All rights reserved.
@@ -56,68 +57,33 @@
 #pragma warning (disable: 4305)
 #endif
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <assert.h>
+
+#include <cassert>
 #ifdef __linux__
 #include <malloc.h>
 #endif
-#include <math.h>
+#include <cmath>
 #include <map>
 #include <string>
 #include <algorithm>
 #include <sys/types.h>
 // clhelper
+
 #include "clHelper/buffer.h"
 #include "clHelper/embeddedProgram.h"
+#include "Image.h"
+#include "BenchKernel.h"
 
-#define NSUBSAMPLES        2
+#define NSUBSAMPLES     4
 
-struct Image {
-    Image(size_t width, size_t height)
-            : width(width), height(height),
-              pix(new float[3*width*height])
-    {};
-    ~Image() { delete[] pix; }
+int run_bench(int num, const std::shared_ptr<clHelper::Device>& device) {
 
-    size_t width, height;
-    float *pix;
+  cl_uint width = 800, height = 600;
 
-    void savePPM(const char *fName);
-};
-
-void Image::savePPM(const char *fname)
-{
-  char *tmp = new char[3*width*height];
-  for (int i=0;i<3*width*height;i++) {
-    tmp[i] = int(std::max(0,std::min(255,int(pix[i]*256.f))));
-  }
-
-  FILE *fp = fopen(fname, "wb");
-  if (!fp) {
-    perror(fname);
-    exit(1);
-  }
-
-  fprintf(fp, "P6\n");
-  fprintf(fp, "%ld %ld\n", width, height);
-  fprintf(fp, "255\n");
-  fwrite(tmp, 3*width*height, 1, fp);
-  fclose(fp);
-}
-
-
-int run_bench(int num, std::shared_ptr<clHelper::Device> device) {
-
-  cl_uint width = 800*3, height = 600*3;
   Image image(width,height);
 
-  std::vector<std::shared_ptr<clHelper::Device>> devices
-          = clHelper::getAllDevices();
-
   /*! get the opencl source */
-  const std::string source = clHelper::getEmbeddedProgram("aoBench.cl");
+  const std::string source = clHelper::getEmbeddedProgram("../shaders/exampleKernel.cl");
 
   /* Create OpenCL context */
   cl_int ret;
@@ -128,54 +94,17 @@ int run_bench(int num, std::shared_ptr<clHelper::Device> device) {
   cl_command_queue command_queue = clCreateCommandQueue(context, device_id, 0, &ret);
   /* command_queue = clCreateCommandQueueWithProperties(context, device_id, 0, &ret); */
 
-  /* Create Memory Buffer */
-  size_t memSize = width*height*3*sizeof(float);
-  cl_mem memobj = clCreateBuffer(context, CL_MEM_READ_WRITE,
-                                 memSize, NULL, &ret);
-
-  /*
-  printf("(begin sanity check)\n");
-  printf("source size: %lu\n",source.size());
-   for (int i=0;i<source.size();i++)
-     printf("%c",source[i]);
-   printf("(end sanity)\n");
-  */
-
-  /* Create Kernel Program from the source */
-  const char *source_str = source.c_str();
-  size_t source_size = source.size();
-  cl_program program = clCreateProgramWithSource(context, 1, (const char **)&source_str,
-                                                 (const size_t *)&source_size, &ret);
-
-  /* Build Kernel Program */
-  ret = clBuildProgram(program, 1, &device_id, NULL, NULL, NULL);
-
-  /* Create OpenCL Kernel */
-  cl_kernel kernel = clCreateKernel(program, "aoBench", &ret);
+  auto bench_kernel = BenchKernel(command_queue,"aoBench", width, height);
 
 
   std::chrono::time_point<std::chrono::system_clock> clock_begin
           = std::chrono::system_clock::now();
 
-  /* Set OpenCL Kernel Parameters */
-  int numSubSamples = 4;
-  ret = clSetKernelArg(kernel, 0, sizeof(width),  (void *)&width);
-  ret = clSetKernelArg(kernel, 1, sizeof(height), (void *)&height);
-  ret = clSetKernelArg(kernel, 2, sizeof(numSubSamples), (void *)&numSubSamples);
-  ret = clSetKernelArg(kernel, 3, sizeof(cl_mem), (void *)&memobj);
-
-  /* Execute OpenCL Kernel */
-  // ret = clEnqueueTask(command_queue, kernel, 0, NULL,NULL);
-  // size_t global_work_offset[2] = { 0, 0 };
-  size_t global_work_size[2] = { width, height };
-  // size_t local_work_size[2] = { 8, 8 };
-  ret = clEnqueueNDRangeKernel(command_queue, kernel, 2,
-                               NULL, global_work_size, NULL,
-                               0, NULL, NULL);
+  bench_kernel.process();
 
   /* Copy results from the memory buffer */
-  ret = clEnqueueReadBuffer(command_queue, memobj, CL_TRUE, 0,
-                            memSize, image.pix, 0, NULL, NULL);
+  ret = clEnqueueReadBuffer(command_queue, bench_kernel.get_destination().buffer , CL_TRUE, 0,
+                            bench_kernel.get_destination().get_length(), image.pix, 0, NULL, NULL);
 
   std::chrono::time_point<std::chrono::system_clock> clock_end
           = std::chrono::system_clock::now();

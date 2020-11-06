@@ -1,3 +1,8 @@
+//
+// Created by denn nevera on 06/11/2020.
+//
+
+
 // -*- mode: c++ -*-
 // ======================================================================== //
 // Copyright 2017 Ingo Wald                                                 //
@@ -15,7 +20,7 @@
 // limitations under the License.                                           //
 // ======================================================================== //
 
-/* originally imported from https://github.com/ispc/ispc, under the 
+/* originally imported from https://github.com/ispc/ispc, under the
    following license */
 /*
   Copyright (c) 2010-2011, Intel Corporation
@@ -47,11 +52,14 @@
   PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
   LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
   NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
-  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.  
+  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 /*
   Based on Syoyo Fujita's aobench: http://code.google.com/p/aobench
 */
+
+#ifndef DEHANCER_OPENCL_HELPER_AOBENCHKERNEL_H
+#define DEHANCER_OPENCL_HELPER_AOBENCHKERNEL_H
 
 /*! special thanks to
   - Syoyo Fujita, who apparently created the first aobench that was the root of all this!
@@ -64,14 +72,14 @@
 
 inline void rng_seed(struct RNGState *rng, int s)
 {
-  const int a = 16807; 
+  const int a = 16807;
   const int m = 2147483647;
   const int q = 127773;
   const int r = 2836;
-  
+
   if (s == 0) rng->seed = 1;
   else rng->seed = s & 0x7FFFFFFF;
-  
+
   for (int j = TABLE_SIZE+WARMUP_ITERATIONS; j >= 0; j--) {
     int k = rng->seed / q;
     rng->seed = a*(rng->seed - k*q) - r*k;
@@ -88,7 +96,7 @@ inline float rng_getInt(struct RNGState *rng)
   const int q = 127773;
   const int r = 2836;
   const int f = 1 + (2147483647 / TABLE_SIZE);
-  
+
   int k = rng->seed / q;
   rng->seed = a*(rng->seed - k*q) - r*k;
   rng->seed = rng->seed & 0x7FFFFFFF;
@@ -163,11 +171,11 @@ inline void ray_plane_intersect(struct Isect *isect, struct Ray ray, struct Plan
   float d = -dot3f(plane.p, plane.n);
   float v =  dot3f(ray.dir, plane.n);
 
-  if (fabs(v) < 1.0e-17f) 
+  if (fabs(v) < 1.0e-17f)
     return;
   else {
     float t = -(dot3f(ray.org, plane.n) + d) / v;
-    
+
     if ((t > 0.0f) && (t < isect->t)) {
       isect->t = t;
       isect->hit = 1;
@@ -181,11 +189,11 @@ inline void ray_plane_intersect(struct Isect *isect, struct Ray ray, struct Plan
 inline void ray_sphere_intersect(struct Isect *isect, struct Ray ray, struct Sphere sphere)
 {
   struct vec3f rs = sub3f(ray.org,sphere.center);
-  
+
   float B = dot3f(rs, ray.dir);
   float C = dot3f(rs, rs) - sphere.radius * sphere.radius;
   float D = B * B - C;
-  
+
   if (D > 0.f) {
     float t = -B - sqrt(D);
 
@@ -259,8 +267,8 @@ float ambient_occlusion(struct Isect *isect, struct Plane plane, struct Sphere s
       occIsect.hit = 0;
 
       for (int snum = 0; snum < 3; ++snum)
-        ray_sphere_intersect(&occIsect, ray, spheres[snum]); 
-      ray_plane_intersect (&occIsect, ray, plane); 
+        ray_sphere_intersect(&occIsect, ray, spheres[snum]);
+      ray_plane_intersect (&occIsect, ray, plane);
 
       if (occIsect.hit) occlusion += 1.0f;
     }
@@ -274,14 +282,14 @@ float ambient_occlusion(struct Isect *isect, struct Plane plane, struct Sphere s
 /* Compute the image for the scanlines from [y0,y1), for an overall image
    of width w and height h.
 */
-__kernel void aoBench(int w, int h,  int nsubsamples, 
+__kernel void aoBench(int w, int h,  int nsubsamples,
                       __global float *image)
 {
   struct Plane plane = { { 0.0f, -0.5f, 0.0f }, { 0.f, 1.f, 0.f } };
   struct Sphere spheres[3] = {
-    { { -2.0f, 0.0f, -3.5f }, 0.5f },
-    { { -0.5f, 0.0f, -3.0f }, 0.5f },
-    { { 1.0f, 0.0f, -2.2f }, 0.5f } };
+          { { -2.0f, 0.0f, -3.5f }, 0.5f },
+          { { -0.5f, 0.0f, -3.0f }, 0.5f },
+          { { 1.0f, 0.0f, -2.2f }, 0.5f } };
   struct RNGState rngstate;
 
   float invSamples = 1.f / nsubsamples;
@@ -290,64 +298,46 @@ __kernel void aoBench(int w, int h,  int nsubsamples,
   int y = get_global_id(1);
   int offset = 3 * (y * w + x);
   rng_seed(&rngstate,offset); //, programIndex + (y0 << (programIndex & 15)));
-  
+
   float ret = 0.f;
   for (int v=0;v<nsubsamples;v++)
     for (int u=0;u<nsubsamples;u++) {
       float du = (float)u * invSamples, dv = (float)v * invSamples;
-      
+
       // Figure out x,y pixel in NDC
       float px =  (x + du - (w / 2.0f)) / (w / 2.0f);
       float py = -(y + dv - (h / 2.0f)) / (h / 2.0f);
       struct Ray ray;
       struct Isect isect;
-      
+
       ray.org.x = 0.f;
       ray.org.y = 0.f;
       ray.org.z = 0.f;
-      
+
       // Poor man's perspective projection
       ray.dir.x = px;
       ray.dir.y = py;
       ray.dir.z = -1.0f;
       ray.dir = normalize3f(ray.dir);
-      
+
       isect.t   = 1.0e+17f;
       isect.hit = 0;
-      
+
       for (int snum = 0; snum < 3; ++snum)
         ray_sphere_intersect(&isect, ray, spheres[snum]);
       ray_plane_intersect(&isect, ray, plane);
-      
+
       if (isect.hit) {
         ret += ambient_occlusion(&isect, plane, spheres, &rngstate);
-        
+
       }
     }
-  
+
   ret *= (invSamples * invSamples);
-  
+
   image[offset] = ret;
   image[offset+1] = ret*0.5;
   image[offset+2] = ret*.01;
 }
 
-__kernel void hello(__global char* string)
-{
-  string[0] = 'H';
-  string[1] = 'e';
-  string[2] = 'l';
-  string[3] = 'l';
-  string[4] = 'o';
-  string[5] = ',';
-  string[6] = ' ';
-  string[7] = 'W';
-  string[8] = 'o';
-  string[9] = 'r';
-  string[10] = 'l';
-  string[11] = 'd';
-  string[12] = '!';
-  string[13] = '?';
-  string[14] = '\0';
-}
-
+#endif //DEHANCER_OPENCL_HELPER_AOBENCHKERNEL_H

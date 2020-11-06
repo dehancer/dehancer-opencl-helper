@@ -30,7 +30,9 @@ int main()
   /* const char *source_str = _expanded_opencl__hello_cl; */
   /* const size_t source_size = _expanded_opencl__hello_cl_len; */
   size_t source_size;
-  const char *source_str = clhGetEmbeddedProgram("hello.cl",&source_size);
+  //const char *source_str = clhGetEmbeddedProgram("hello.cl",&source_size);
+  const char *source_str = clhGetEmbeddedProgram("../shaders/exampleKernel.cl",&source_size);
+
   if (!source_str) {
     printf("could not find embedded program 'hello.cl'\n");
     exit(1);
