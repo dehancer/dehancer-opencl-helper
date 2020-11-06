@@ -12,14 +12,17 @@
 
 struct Image {
 
-    Image(size_t width, size_t height)
-            : width(width), height(height),
-              pix(new float[3*width*height])
-    {};
+    Image(size_t _width, size_t _height)
+            : width(_width),
+              height(_height),
+              length(3*width*height),
+              pix(new float[length])
+    {
+    };
 
     ~Image() { delete[] pix; }
 
-    size_t width, height;
+    size_t width, height, length;
     float *pix;
 
     void savePPM(const char *fName) const;

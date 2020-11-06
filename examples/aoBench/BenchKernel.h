@@ -12,13 +12,13 @@ struct Texture {
     cl_mem buffer = nullptr;
     size_t width = 0;
     size_t height = 0;
-    size_t depth = 0;
+    size_t depth = 1;
 
     size_t get_length() const { return width*height*depth*3*sizeof(float);}
 };
 
 inline void release(const Texture& texture) {
-  if (texture.buffer) free(texture.buffer);
+  if (texture.buffer) clReleaseMemObject(texture.buffer);
 }
 
 class BenchKernel {

@@ -48,10 +48,10 @@ namespace clHelper {
            32*1024
            ,
            0 };
-    
+
     deviceCommandQueue
       = clCreateCommandQueueWithProperties(this->handle, device->clDeviceID,
-                                           nullptr, &ret);
+                                           devQueueProps, &ret);
 #endif
 
     if (ret != CL_SUCCESS)

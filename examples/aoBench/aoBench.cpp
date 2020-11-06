@@ -83,19 +83,17 @@ int run_bench(int num, const std::shared_ptr<clHelper::Device>& device) {
   Image image(width,height);
 
   /*! get the opencl source */
-  const std::string source = clHelper::getEmbeddedProgram("../shaders/exampleKernel.cl");
+  //const std::string source = clHelper::getEmbeddedProgram("../shaders/exampleKernel.cl");
 
   /* Create OpenCL context */
   cl_int ret;
   cl_device_id device_id = device->clDeviceID;
-  cl_context context = clCreateContext(NULL, 1, &device_id, NULL, NULL, &ret);
+  cl_context context = clCreateContext(nullptr, 1, &device_id, nullptr, nullptr, &ret);
 
   /* Create Command Queue */
   cl_command_queue command_queue = clCreateCommandQueue(context, device_id, 0, &ret);
-  /* command_queue = clCreateCommandQueueWithProperties(context, device_id, 0, &ret); */
 
-  auto bench_kernel = BenchKernel(command_queue,"aoBench", width, height);
-
+  auto bench_kernel = BenchKernel(command_queue,"aoBench", width, height, NSUBSAMPLES);
 
   std::chrono::time_point<std::chrono::system_clock> clock_begin
           = std::chrono::system_clock::now();
@@ -103,8 +101,15 @@ int run_bench(int num, const std::shared_ptr<clHelper::Device>& device) {
   bench_kernel.process();
 
   /* Copy results from the memory buffer */
-  ret = clEnqueueReadBuffer(command_queue, bench_kernel.get_destination().buffer , CL_TRUE, 0,
-                            bench_kernel.get_destination().get_length(), image.pix, 0, NULL, NULL);
+  ret = clEnqueueReadBuffer(command_queue,
+                            bench_kernel.get_destination().buffer ,
+                            CL_TRUE,
+                            0,
+                            bench_kernel.get_destination().get_length(),
+                            image.pix,
+                            0,
+                            nullptr,
+                            nullptr);
 
   std::chrono::time_point<std::chrono::system_clock> clock_end
           = std::chrono::system_clock::now();
@@ -133,11 +138,13 @@ int main(int argc, char **argv)
   assert(!devices.empty());
 
   int dev_num = 0;
+  std::cout << "Info: " << std::endl;
   for (auto d: devices) {
     std::cout << " #" << dev_num++ << std::endl;
     d->print(" ", std::cout);
   }
 
+  std::cout << "Bench: " << std::endl;
   dev_num = 0;
   for (auto d: devices) {
     if (run_bench(dev_num++, d)!=0) return -1;

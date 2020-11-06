@@ -282,7 +282,9 @@ float ambient_occlusion(struct Isect *isect, struct Plane plane, struct Sphere s
 /* Compute the image for the scanlines from [y0,y1), for an overall image
    of width w and height h.
 */
-__kernel void aoBench(int w, int h,  int nsubsamples,
+__kernel void aoBench(int w,
+                      int h,
+                      int nsubsamples,
                       __global float *image)
 {
   struct Plane plane = { { 0.0f, -0.5f, 0.0f }, { 0.f, 1.f, 0.f } };
@@ -335,9 +337,14 @@ __kernel void aoBench(int w, int h,  int nsubsamples,
 
   ret *= (invSamples * invSamples);
 
-  image[offset] = ret;
-  image[offset+1] = ret*0.5;
-  image[offset+2] = ret*.01;
+//  image[offset]   = ret;
+//  image[offset+1] = ret;
+//  image[offset+2] = ret;
+
+  image[offset]   = 1;
+  image[offset+1] = 0;
+  image[offset+2] = 0;
+
 }
 
 #endif //DEHANCER_OPENCL_HELPER_AOBENCHKERNEL_H

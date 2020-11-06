@@ -71,14 +71,19 @@ void BenchKernel::process() {
     std::runtime_error("Unable to create texture for: " + kernel_name_);
   }
 
-  size_t localWorkSize[2], globalWorkSize[2];
-  clGetKernelWorkGroupInfo(kernel_, device_id_, CL_KERNEL_WORK_GROUP_SIZE, sizeof(size_t), localWorkSize, nullptr);
-  localWorkSize[1] = 1;
-  globalWorkSize[0] = ((width_ + localWorkSize[0] - 1) / localWorkSize[0]) * localWorkSize[0];
-  globalWorkSize[1] = height_;
+//  size_t localWorkSize[2], globalWorkSize[2];
+//  clGetKernelWorkGroupInfo(kernel_, device_id_, CL_KERNEL_WORK_GROUP_SIZE, sizeof(size_t), localWorkSize, nullptr);
+//  localWorkSize[1] = 1;
+//  globalWorkSize[0] = ((width_ + localWorkSize[0] - 1) / localWorkSize[0]) * localWorkSize[0];
+//  globalWorkSize[1] = height_;
+//
+//  last_error_ = clEnqueueNDRangeKernel(get_command_queue(), kernel_, 2, nullptr, globalWorkSize, localWorkSize, 0, nullptr, nullptr);
 
-  last_error_ = clEnqueueNDRangeKernel(get_command_queue(), kernel_, 2, nullptr, globalWorkSize, localWorkSize, 0, nullptr, nullptr);
-
+  size_t global_work_size[2] = { width_, height_ };
+  // size_t local_work_size[2] = { 8, 8 };
+  last_error_ = clEnqueueNDRangeKernel(get_command_queue(), kernel_, 2,
+                               nullptr, global_work_size, nullptr,
+                               0, nullptr, nullptr);
 
   if (last_error_ != CL_SUCCESS) {
     std::runtime_error("Unable to enqueue kernel: " + kernel_name_);
@@ -97,9 +102,9 @@ Texture BenchKernel::make_texture(size_t width, size_t height, size_t depth) {
 }
 
 BenchKernel::~BenchKernel() {
-  release(ao_texture_);
-  if (kernel_) clReleaseKernel(kernel_);
-  if (program_) clReleaseProgram(program_);
+//  release(ao_texture_);
+//  if (kernel_) clReleaseKernel(kernel_);
+//  if (program_) clReleaseProgram(program_);
 }
 
 Texture BenchKernel::get_destination() const {
