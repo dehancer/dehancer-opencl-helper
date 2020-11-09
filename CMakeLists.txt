@@ -2,8 +2,14 @@ PROJECT(dehancer-opencl-helper)
 cmake_minimum_required(VERSION 2.6)
 
 if (NOT CMAKE_INSTALL_LIBDIR)
-    set(CMAKE_INSTALL_LIBDIR  lib)
+    set(CMAKE_INSTALL_LIBDIR lib)
 endif ()
+
+set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -g")
+
+if(PRINT_DEBUG)
+    set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -DPRINT_DEBUG=1")
+endif()
 
 set(CMAKE_MACOSX_RPATH TRUE)
 SET(clHelper_DIR ${CMAKE_CURRENT_SOURCE_DIR}/clHelper)

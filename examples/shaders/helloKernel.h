@@ -16,5 +16,6 @@ __kernel void hello(__global char* string)
   string[11] = 'd';
   string[12] = '!';
   string[13] = '?';
-  string[14] = '\0';
+  string[14] = '#';
+  string[15] = '\0';
 }

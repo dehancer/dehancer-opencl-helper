@@ -1,14 +1,24 @@
 
 INCLUDE(${clHelper_DIR}/clHelper.cmake)
-COMPILE_OPENCL(aoBench.cl)
+
+COMPILE_OPENCL(
+        ../shaders/exampleKernel.cl
+        #aoBench.cl
+)
+
 OPENCL_INCLUDE_DIRECTORIES(
         ./
+        ../shaders
 )
+
 ADD_EXECUTABLE(example_aoBench
-  aoBench.cpp
-  ${EMBEDDED_OPENCL_KERNELS}
-  )
+        aoBench.cpp
+        Function.cpp
+        Image.cpp
+        ${EMBEDDED_OPENCL_KERNELS}
+        )
+
 TARGET_LINK_LIBRARIES(example_aoBench
-  clHelperLib
-  )
+        clHelperLib
+        )
 

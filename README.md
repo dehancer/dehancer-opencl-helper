@@ -120,4 +120,35 @@ significantly expanded from - the cmake macros the OSPRay project
 introduced to build ISPC files (see https://github.com/ospray/OSPRay,
 and more generally http://www.ospray.org). 
 
+Requirements 
+============
 
+    docker run  --name=centos8-opencl -t -i -v /Users/denn/Develop/Dehancer/Dehancer-Plugins:/home/Develop/Dehancer/Dehancer-Plugins  centos:centos8 /bin/bash
+    yum install yum-utils
+    yum makecache   
+    yum update
+    yum install clang 
+    yum install http://repo.okay.com.mx/centos/7/x86_64/release/okay-release-1-1.noarch.rpm
+    yum install libopencl-devel
+    dnf --enablerepo=PowerTools install opencl-headers
+    yum install ocl-icd
+    ln -s /usr/lib64/libOpenCL.so.1 /usr/lib/libOpenCL.so
+    yum install vim-common # xxd command 
+    
+    
+Install clang centos
+====================
+
+    yum install llvm-toolset-7
+    scl enable llvm-toolset-7 bash    
+    
+Install clang ubuntu
+====================
+
+    https://justiceboi.github.io/blog/install-clang-9-on-ubuntu/    
+    
+Update CMake 3.15
+=================
+
+    yum install wget
+    wget https://github.com/Kitware/CMake/releases/download/v3.15.2/cmake-3.15.2.tar.gz
