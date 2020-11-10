@@ -282,8 +282,12 @@ float ambient_occlusion(struct Isect *isect, struct Plane plane, struct Sphere s
 /* Compute the image for the scanlines from [y0,y1), for an overall image
    of width w and height h.
 */
-__kernel void aoBench(int w, int h, int nsubsamples, __write_only image2d_t output_image )
+__kernel void ao_bench_kernel(int nsubsamples, __write_only image2d_t destination )
 {
+
+  int w = get_image_width (destination);
+  int h = get_image_height (destination);
+
   struct Plane plane = { { 0.0f, -0.5f, 0.0f }, { 0.f, 1.f, 0.f } };
   struct Sphere spheres[3] = {
           { { -2.0f, 0.0f, -3.5f }, 0.5f },
@@ -337,9 +341,37 @@ __kernel void aoBench(int w, int h, int nsubsamples, __write_only image2d_t outp
 
   float4 color = (float4)(ret,ret,ret,1);
 
-  int2 coordinates = (int2)(x, y);
+  int2 gid = (int2)(x, y);
 
-  write_imagef(output_image, coordinates, color);
+  write_imagef(destination, gid, color);
+
+}
+
+
+__constant sampler_t sampler = CLK_NORMALIZED_COORDS_TRUE | CLK_ADDRESS_CLAMP_TO_EDGE | CLK_FILTER_LINEAR;
+
+__kernel void blend_kernel(__read_only image2d_t source, __write_only image2d_t destination) {
+
+  int2 gid = (int2)(get_global_id(0),
+                    get_global_id(1));
+
+  int2 imageSize = (int2)(get_image_width(destination),
+                          get_image_height(destination));
+
+  if (gid.x >= imageSize.x || gid.y >= imageSize.y)
+  {
+    return;
+  }
+
+  // Normalize coordinates
+  float2 coords = (float2)((float)gid.x / (imageSize.x - 1),
+                           (float)gid.y / (imageSize.y - 1));
+
+
+  float4 inColor = read_imagef(source, sampler, coords);
+  inColor.z = 0.5;
+
+  write_imagef(destination, gid, inColor);
 
 }
 

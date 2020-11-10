@@ -55,16 +55,7 @@ namespace dehancer::opencl::example  {
     }
 
 
-
     Texture Function::make_texture(size_t width, size_t height, size_t depth) {
-
-//      size_t memSize = width * height * depth * 4 * sizeof(float);
-//
-//      cl_mem memobj = clCreateBuffer(context_, CL_MEM_READ_WRITE, memSize, NULL, &last_error_);
-//      if (last_error_ != CL_SUCCESS) {
-//        std::runtime_error("Unable to create texture for: " + kernel_name_);
-//      }
-
 
       cl_image_format format;
       cl_image_desc   desc;
@@ -129,10 +120,10 @@ namespace dehancer::opencl::example  {
         std::runtime_error("Unable to enqueue kernel: " + kernel_name_);
       }
 
-      last_error_ = clWaitForEvents( 1, &AlphaComposting12 );
-
-      if (last_error_ != CL_SUCCESS) {
-        std::runtime_error("Unable to enqueue kernel: " + kernel_name_);
-      }
+//      last_error_ = clWaitForEvents( 1, &AlphaComposting12 );
+//
+//      if (last_error_ != CL_SUCCESS) {
+//        std::runtime_error("Unable to enqueue kernel: " + kernel_name_);
+//      }
     }
 }
