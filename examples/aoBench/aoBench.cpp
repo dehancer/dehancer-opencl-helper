@@ -94,7 +94,7 @@ int run_bench2(int num, const std::shared_ptr<clHelper::Device>& device) {
   auto command_queue = make_command_queue(device);
 
   auto bench_kernel = dehancer::opencl::example::Function(command_queue, "ao_bench_kernel");
-  auto ao_bench_text = bench_kernel.make_texture(width*2,height*2);
+  auto ao_bench_text = bench_kernel.make_texture(width/2,height/2);
 
   auto blend_kernel = dehancer::opencl::example::Function(command_queue, "blend_kernel");
   auto destination_text = blend_kernel.make_texture(width,height);
@@ -106,10 +106,10 @@ int run_bench2(int num, const std::shared_ptr<clHelper::Device>& device) {
       int numSubSamples = NSUBSAMPLES, count = 0;
 
       auto ret = clSetKernelArg(kernel, count++, sizeof(numSubSamples), (void *)&numSubSamples);
-      if (ret != CL_SUCCESS) std::runtime_error("Unable to pass to kernel the number of samples");
+      if (ret != CL_SUCCESS) throw std::runtime_error("Unable to pass to kernel the number of samples");
 
       ret = clSetKernelArg(kernel, count++, sizeof(cl_mem), (void *)&ao_bench_text.buffer);
-      if (ret != CL_SUCCESS) std::runtime_error("Unable to pass to kernel the texture buffer");
+      if (ret != CL_SUCCESS) throw std::runtime_error("Unable to pass to kernel the texture buffer");
 
       return ao_bench_text;
   });
@@ -118,10 +118,10 @@ int run_bench2(int num, const std::shared_ptr<clHelper::Device>& device) {
       int count = 0;
 
       auto ret = clSetKernelArg(kernel, count++, sizeof(cl_mem), (void *)&ao_bench_text.buffer);
-      if (ret != CL_SUCCESS) std::runtime_error("Unable to pass to kernel the source texture buffer");
+      if (ret != CL_SUCCESS) throw std::runtime_error("Unable to pass to kernel the source texture buffer");
 
       ret = clSetKernelArg(kernel, count++, sizeof(cl_mem), (void *)&destination_text.buffer);
-      if (ret != CL_SUCCESS) std::runtime_error("Unable to pass to kernel the destination texture buffer");
+      if (ret != CL_SUCCESS) throw std::runtime_error("Unable to pass to kernel the destination texture buffer");
 
       return destination_text;
   });
@@ -149,7 +149,7 @@ int run_bench2(int num, const std::shared_ptr<clHelper::Device>& device) {
           nullptr );
 
   if (ret != CL_SUCCESS) {
-    std::runtime_error("Unable to create texture");
+    throw std::runtime_error("Unable to create texture");
   }
 
   std::chrono::time_point<std::chrono::system_clock> clock_end

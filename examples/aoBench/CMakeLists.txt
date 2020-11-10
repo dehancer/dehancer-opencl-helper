@@ -3,7 +3,6 @@ INCLUDE(${clHelper_DIR}/clHelper.cmake)
 
 COMPILE_OPENCL(
         ../shaders/exampleKernel.cl
-        #aoBench.cl
 )
 
 OPENCL_INCLUDE_DIRECTORIES(

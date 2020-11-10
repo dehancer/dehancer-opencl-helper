@@ -15,13 +15,13 @@ namespace dehancer::opencl::example  {
       last_error_ = clGetCommandQueueInfo(get_command_queue(), CL_QUEUE_DEVICE, sizeof(cl_device_id), &device_id_,
                                           nullptr);
       if (last_error_ != CL_SUCCESS) {
-        std::runtime_error("Unable to get OpenCL the device");
+        throw std::runtime_error("Unable to get OpenCL the device");
       }
 
       last_error_ = clGetCommandQueueInfo(get_command_queue(), CL_QUEUE_CONTEXT, sizeof(cl_context), &context_,
                                           nullptr);
       if (last_error_ != CL_SUCCESS) {
-        std::runtime_error("Unable to get OpenCL context");
+        throw std::runtime_error("Unable to get OpenCL context");
       }
 
       const std::string source = clHelper::getEmbeddedProgram("../shaders/exampleKernel.cl");
@@ -32,21 +32,21 @@ namespace dehancer::opencl::example  {
                                            (const size_t *) &source_size, &last_error_);
 
       if (last_error_ != CL_SUCCESS) {
-        std::runtime_error("Unable to create OpenCL program from exampleKernel.cl");
+        throw std::runtime_error("Unable to create OpenCL program from exampleKernel.cl");
       }
 
 
       /* Build Kernel Program */
-      last_error_ = clBuildProgram(program_, 1, &device_id_, NULL, NULL, NULL);
+      last_error_ = clBuildProgram(program_, 1, &device_id_, nullptr, nullptr, nullptr);
 
       if (last_error_ != CL_SUCCESS) {
-        std::runtime_error("Unable to build OpenCL program from exampleKernel.cl");
+        throw std::runtime_error("Unable to build OpenCL program from exampleKernel.cl");
       }
 
       kernel_ = clCreateKernel(program_, kernel_name_.c_str(), &last_error_);
 
       if (last_error_ != CL_SUCCESS) {
-        std::runtime_error("Unable to create kernel for: " + kernel_name_);
+        throw std::runtime_error("Unable to create kernel for: " + kernel_name_);
       }
     }
 
@@ -80,7 +80,7 @@ namespace dehancer::opencl::example  {
               &last_error_);
 
       if (last_error_ != CL_SUCCESS) {
-        std::runtime_error("Unable to create texture for: " + kernel_name_);
+        throw std::runtime_error("Unable to create texture for: " + kernel_name_);
       }
 
       return {memobj, width, height, depth};
@@ -117,13 +117,13 @@ namespace dehancer::opencl::example  {
                                            nullptr, &AlphaComposting12);
 
       if (last_error_ != CL_SUCCESS) {
-        std::runtime_error("Unable to enqueue kernel: " + kernel_name_);
+        throw std::runtime_error("Unable to enqueue kernel: " + kernel_name_);
       }
 
-//      last_error_ = clWaitForEvents( 1, &AlphaComposting12 );
-//
-//      if (last_error_ != CL_SUCCESS) {
-//        std::runtime_error("Unable to enqueue kernel: " + kernel_name_);
-//      }
+      last_error_ = clWaitForEvents( 1, &AlphaComposting12 );
+
+      if (last_error_ != CL_SUCCESS) {
+        throw std::runtime_error("Unable to enqueue kernel: " + kernel_name_);
+      }
     }
 }
