@@ -18,7 +18,7 @@ namespace dehancer::opencl::example {
         size_t height = 0;
         size_t depth = 1;
 
-        size_t get_length() const { return width * height * depth * 3 * sizeof(float); }
+        size_t get_length() const { return width * height * depth * 4 * sizeof(float); }
     };
 
     typedef std::function<Texture (cl_kernel& compute_kernel)> FunctionHandler;

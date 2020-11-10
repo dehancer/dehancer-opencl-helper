@@ -99,6 +99,7 @@ int run_bench2(int num, const std::shared_ptr<clHelper::Device>& device) {
           = std::chrono::system_clock::now();
 
   auto output = bench_kernel.make_texture(width,height);
+
   bench_kernel.execute([&output,width,height](auto kernel){
       int numSubSamples = NSUBSAMPLES;
       auto ret = clSetKernelArg(kernel, 0, sizeof(width),  (void *)&width);
@@ -113,8 +114,25 @@ int run_bench2(int num, const std::shared_ptr<clHelper::Device>& device) {
 
   /* Copy results from the memory buffer */
 
-  cl_int ret = clEnqueueReadBuffer(command_queue, output.buffer, CL_TRUE, 0,
-                            output.get_length(), image.pix, 0, nullptr, nullptr);
+  size_t originst[3];
+  size_t regionst[3];
+  size_t  rowPitch = 0;
+  size_t  slicePitch = 0;
+  originst[0] = 0; originst[1] = 0; originst[2] = 0;
+  regionst[0] = width; regionst[1] = height; regionst[2] = 1;
+
+  cl_int ret = clEnqueueReadImage(
+          command_queue,
+          output.buffer,
+          CL_TRUE,
+          originst,
+          regionst,
+          rowPitch,
+          slicePitch,
+          image.pix,
+          0,
+          nullptr,
+          nullptr );
 
   if (ret != CL_SUCCESS) {
     std::runtime_error("Unable to create texture");
@@ -140,24 +158,31 @@ int run_bench2(int num, const std::shared_ptr<clHelper::Device>& device) {
 int main(int argc, char **argv)
 {
 
-  std::vector<std::shared_ptr<clHelper::Device>> devices
-          = clHelper::getAllDevices();
+  try {
+    std::vector<std::shared_ptr<clHelper::Device>> devices
+            = clHelper::getAllDevices();
 
-  std::shared_ptr<clHelper::Device> device;
+    std::shared_ptr<clHelper::Device> device;
 
-  assert(!devices.empty());
+    assert(!devices.empty());
 
-  int dev_num = 0;
-  std::cout << "Info: " << std::endl;
-  for (auto d: devices) {
-    std::cout << " #" << dev_num++ << std::endl;
-    d->print(" ", std::cout);
+    int dev_num = 0;
+    std::cout << "Info: " << std::endl;
+    for (auto d: devices) {
+      std::cout << " #" << dev_num++ << std::endl;
+      d->print(" ", std::cout);
+    }
+
+    std::cout << "Bench: " << std::endl;
+    dev_num = 0;
+    for (auto d: devices) {
+      if (run_bench2(dev_num++, d)!=0) return -1;
+    }
+    return 0;
+  }
+  catch (const std::runtime_error &e) {
+    std::cerr << "Error: " << e.what() << std::endl;
+    return -1;
   }
 
-  std::cout << "Bench: " << std::endl;
-  dev_num = 0;
-  for (auto d: devices) {
-    if (run_bench2(dev_num++, d)!=0) return -1;
-  }
-  return 0;
 }

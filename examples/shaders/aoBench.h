@@ -21,7 +21,6 @@ struct RNGState {
     int table[TABLE_SIZE];
 };
 
-
 struct vec3f {
     float x,y,z;
 };
