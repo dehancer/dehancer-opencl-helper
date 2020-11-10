@@ -3,6 +3,7 @@
 //
 
 #include "Function.h"
+#include <cstring>
 
 namespace dehancer::opencl::example  {
     Function::Function(const void *command_queue,
@@ -54,10 +55,30 @@ namespace dehancer::opencl::example  {
     }
 
 
-
     Texture Function::make_texture(size_t width, size_t height, size_t depth) {
-      size_t memSize = width * height * 3 * sizeof(float);
-      cl_mem memobj = clCreateBuffer(context_, CL_MEM_READ_WRITE, memSize, NULL, &last_error_);
+
+      cl_image_format format;
+      cl_image_desc   desc;
+
+      memset( &format, 0, sizeof( format ) );
+
+      format.image_channel_order = CL_RGBA;
+      format.image_channel_data_type = CL_FLOAT;
+
+      memset( &desc, 0, sizeof( desc ) );
+      desc.image_type = CL_MEM_OBJECT_IMAGE2D;
+      desc.image_width = width;
+      desc.image_height = height;
+      desc.image_depth = 1;
+
+      cl_mem memobj = clCreateImage(
+              context_,
+              CL_MEM_READ_WRITE,
+              &format,
+              &desc,
+              nullptr,
+              &last_error_);
+
       if (last_error_ != CL_SUCCESS) {
         std::runtime_error("Unable to create texture for: " + kernel_name_);
       }
@@ -71,18 +92,38 @@ namespace dehancer::opencl::example  {
     }
 
     void Function::execute(const FunctionHandler &block) {
-      auto texture = block(kernel_);
-      size_t localWorkSize[2] = {1,1};
-      size_t globalWorkSize[2];
-      clGetKernelWorkGroupInfo(kernel_,  device_id_, CL_KERNEL_WORK_GROUP_SIZE, sizeof(size_t), localWorkSize, nullptr);
-      if (localWorkSize[0]>=texture.width) localWorkSize[0] = texture.width;
-      std::cout << " localWorkSize = " << localWorkSize[0] <<", "<<localWorkSize[1]<<std::endl;
-      globalWorkSize[0] = ((texture.width + localWorkSize[0] - 1) / localWorkSize[0]) * localWorkSize[0];
-      globalWorkSize[1] = texture.height;
 
-      last_error_ = clEnqueueNDRangeKernel(get_command_queue(), kernel_, 2, nullptr, globalWorkSize, localWorkSize, 0, nullptr, nullptr);
+      auto texture = block(kernel_);
+
+      size_t localWorkSize[2] = {1,1};
+
+      clGetKernelWorkGroupInfo(kernel_,  device_id_,
+                               CL_KERNEL_WORK_GROUP_SIZE, sizeof(localWorkSize), localWorkSize, nullptr);
+
+      if (localWorkSize[0]>=texture.width) localWorkSize[0] = texture.width;
+      if (localWorkSize[1]>=texture.height) localWorkSize[1] = texture.height;
+
+      size_t globalWorkSize[2] = {
+              ((texture.width + localWorkSize[0] - 1) / localWorkSize[0]) * localWorkSize[0],
+              ((texture.height + localWorkSize[1] - 1) / localWorkSize[1]) * localWorkSize[1]
+      };
+
+      cl_event    AlphaComposting12 = nullptr;
+
+      last_error_ = clEnqueueNDRangeKernel(get_command_queue(), kernel_, 2, nullptr,
+                                           globalWorkSize,
+                                           localWorkSize,
+                                           0,
+                                           nullptr, &AlphaComposting12);
+
       if (last_error_ != CL_SUCCESS) {
         std::runtime_error("Unable to enqueue kernel: " + kernel_name_);
       }
+
+//      last_error_ = clWaitForEvents( 1, &AlphaComposting12 );
+//
+//      if (last_error_ != CL_SUCCESS) {
+//        std::runtime_error("Unable to enqueue kernel: " + kernel_name_);
+//      }
     }
 }
