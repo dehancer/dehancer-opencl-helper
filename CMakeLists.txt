@@ -1,5 +1,13 @@
-PROJECT(dehancer-opencl-helper)
-cmake_minimum_required(VERSION 2.6)
+cmake_minimum_required(VERSION 3.12)
+
+#
+# Project
+#
+set (PROJECT_LIB dehancer_opencl_helper)
+set (DEHANCER_OPENSCL_VERSION 1)
+option(BUILD_TESTING OFF)
+
+project(${PROJECT_LIB} VERSION 0.0.1)
 
 if (NOT CMAKE_INSTALL_LIBDIR)
     set(CMAKE_INSTALL_LIBDIR lib)
@@ -18,4 +26,6 @@ INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR})
 SET(EXECUTABLE_OUTPUT_PATH ${CMAKE_CURRENT_BINARY_DIR})
 ADD_SUBDIRECTORY(${clHelper_DIR} clHelper_dir)
 
-ADD_SUBDIRECTORY(examples)
+if (BUILD_TESTING)
+    ADD_SUBDIRECTORY(examples)
+endif ()

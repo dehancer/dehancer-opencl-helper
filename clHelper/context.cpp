@@ -35,8 +35,7 @@ namespace clHelper {
 
 #ifdef __APPLE__
     deviceCommandQueue
-            = clCreateCommandQueueWithPropertiesAPPLE(this->handle, device->clDeviceID,
-                                                 nullptr, &ret);
+            = clCreateCommandQueueWithPropertiesAPPLE(this->handle, device->clDeviceID, nullptr, &ret);
 #else
     cl_queue_properties devQueueProps[]
       = {  CL_QUEUE_PROPERTIES,
