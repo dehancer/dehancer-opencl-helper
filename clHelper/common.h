@@ -29,22 +29,11 @@
 #include <iostream>
 #include <memory>
 #include <vector>
-#include <assert.h>
+#include <cassert>
 #endif
 
-// #ifndef STRING
-// /* debug printing macros */
-#define CLH_STRING(x) #x
-// #define TOSTRING(x) STRING(x)
-// #define PING std::cout << __FILE__ << " (" << __LINE__ << "): " << __FUNCTION__ << std::endl
-// #define PRINT(x) std::cout << STRING(x) << " = " << (x) << std::endl
-// #define PRINT2(x,y) std::cout << STRING(x) << " = " << (x) << ", " << STRING(y) << " = " << (y) << std::endl
-// #define PRINT3(x,y,z) std::cout << STRING(x) << " = " << (x) << ", " << STRING(y) << " = " << (y) << ", " << STRING(z) << " = " << (z) << std::endl
-// #define PRINT4(x,y,z,w) std::cout << STRING(x) << " = " << (x) << ", " << STRING(y) << " = " << (y) << ", " << STRING(z) << " = " << (z) << ", " << STRING(w) << " = " << (w) << std::endl
 
-// #define THROW_RUNTIME_ERROR(str) \
-//   throw std::runtime_error(std::string(__FILE__) + " (" + std::to_string((long long)__LINE__) + "): " + std::string(str));
-// #endif
+#define CLH_STRING(x) #x
 
 #define CLH_BUFFER_SIZE 10000
   
@@ -54,21 +43,6 @@
 
 #ifdef __cplusplus  
 namespace clHelper {
-
-  // /*! added pretty-print function for large numbers, printing 10000000 as "10M" instead */
-  // inline std::string prettyNumber(const size_t s) {
-  //   const double val = s;
-  //   char result[100];
-    
-  //   if      (val >= 1e+18f) sprintf(result,"%.1f%c",val/1e18f,'E');
-  //   else if (val >= 1e+15f) sprintf(result,"%.1f%c",val/1e15f,'P');
-  //   else if (val >= 1e+12f) sprintf(result,"%.1f%c",val/1e12f,'T');
-  //   else if (val >= 1e+09f) sprintf(result,"%.1f%c",val/1e09f,'G');
-  //   else if (val >= 1e+06f) sprintf(result,"%.1f%c",val/1e06f,'M');
-  //   else if (val >= 1e+03f) sprintf(result,"%.1f%c",val/1e03f,'k');
-  //   else sprintf(result,"%lu",s);
-  //   return result;
-  // }
 
   /*! added pretty-print function for large numbers, printing 10000000 as "10M" instead */
   inline std::string prettyMetric(const double val) {

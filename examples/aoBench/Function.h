@@ -7,7 +7,7 @@
 #include <string>
 #include <functional>
 
-#include "clHelper/buffer.h"
+#include "clHelper/common.h"
 #include "clHelper/embeddedProgram.h"
 
 namespace dehancer::opencl::example {
