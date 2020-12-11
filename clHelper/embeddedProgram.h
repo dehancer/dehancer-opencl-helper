@@ -38,17 +38,17 @@ namespace clHelper {
 extern "C" {
 #endif
   
-  /*! get a pointer to the embedded OpenCL code, as well as the length
-    of that opencl code (in *kernelLen).  Since the opencl code is
-    embedded into the program executable the resulting pointer does
-    _not_ have to be freed (in fact, trying to free should produce a
-    core dump).  If the symbol couldn't be found we will return NULL,
-    with 'kernelLength' then being undefined.
-    
-    Usage: If your original opencl file (before embedding) was "src/program.cl"
-    then that is exactly the string you'll pass to this function.
-  */
-char *clhGetEmbeddedProgram(const char *clFileName, size_t *kernelLength);
+//  /*! get a pointer to the embedded OpenCL code, as well as the length
+//    of that opencl code (in *kernelLen).  Since the opencl code is
+//    embedded into the program executable the resulting pointer does
+//    _not_ have to be freed (in fact, trying to free should produce a
+//    core dump).  If the symbol couldn't be found we will return NULL,
+//    with 'kernelLength' then being undefined.
+//
+//    Usage: If your original opencl file (before embedding) was "src/program.cl"
+//    then that is exactly the string you'll pass to this function.
+//  */
+//char *clhGetEmbeddedProgram(const char *clFileName, size_t *kernelLength);
   
 #ifdef __cplusplus
 } /* extern C */

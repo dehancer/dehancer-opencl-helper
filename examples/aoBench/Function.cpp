@@ -24,7 +24,7 @@ namespace dehancer::opencl::example  {
         throw std::runtime_error("Unable to get OpenCL context");
       }
 
-      const std::string source = clHelper::getEmbeddedProgram("../shaders/exampleKernel.cl");
+      const std::string source = clHelper::getEmbeddedProgram("exampleKernel.cl");
 
       const char *source_str = source.c_str();
       size_t source_size = source.size();

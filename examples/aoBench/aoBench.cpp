@@ -67,8 +67,8 @@
 #include <algorithm>
 // clhelper
 
-#include "clHelper/buffer.h"
 #include "clHelper/embeddedProgram.h"
+#include "clHelper/device.h"
 #include "Image.h"
 #include "Function.h"
 

@@ -17,64 +17,94 @@
 #include "embeddedProgram.h"
 #include <dlfcn.h>
 #include <sstream>
-#include <stdio.h>
+#include <cstdio>
 
 namespace clHelper {
 
-  extern "C" char *clhGetEmbeddedProgram(const char *fileName, size_t *kernelLength)
-  {
-    char kernel_ptr_symbol_name[10000];
-    sprintf(kernel_ptr_symbol_name,"%s",fileName);
-    // sprintf(kernel_ptr_symbol_name,"_expanded_opencl__%s",fileName);
-  
-    char kernel_len_symbol_name[10000];
-    // sprintf(kernel_len_symbol_name,"_expanded_opencl__%s_len",fileName);
-    sprintf(kernel_len_symbol_name,"%s_len",fileName);
+    enum embed_error {
+        embed_fail = 0,
+        kernel_not_found,
+        kernel_size_is_wrong
+    };
 
-    for (char *s = kernel_ptr_symbol_name; *s; s++) {
-      if (*s == '.') *s = '_';
-      if (*s == '/') *s = '_';
-    }
-    for (char *s = kernel_len_symbol_name; *s; s++) {
-      if (*s == '.') *s = '_';
-      if (*s == '/') *s = '_';
-    }
+    extern "C" char *clhGetEmbeddedProgram(const char *fileName, size_t *kernelLength, embed_error* error)
+    {
+      char kernel_ptr_symbol_name[10000];
+      sprintf(kernel_ptr_symbol_name,"%s",fileName);
 
-    void *mainProgram = dlopen(NULL,RTLD_NOW|RTLD_GLOBAL);
-    void *kernel_ptr_symbol = dlsym(mainProgram,kernel_ptr_symbol_name);
-    if (!kernel_ptr_symbol) return NULL;
-    
-    void *kernel_len_symbol = dlsym(mainProgram,kernel_len_symbol_name);
-    if (!kernel_len_symbol) return NULL;
-    
-    *kernelLength = *(unsigned int *)kernel_len_symbol;
-    char *kernel_src = (char *)kernel_ptr_symbol;
-    
+      char kernel_len_symbol_name[10000];
+      sprintf(kernel_len_symbol_name,"%s_len",fileName);
+
+      for (char *s = kernel_ptr_symbol_name; *s; s++) {
+        if (*s == '.') *s = '_';
+        if (*s == '/') *s = '_';
+      }
+      for (char *s = kernel_len_symbol_name; *s; s++) {
+        if (*s == '.') *s = '_';
+        if (*s == '/') *s = '_';
+      }
+
+      void *mainProgram = dlopen(nullptr,RTLD_NOW|RTLD_GLOBAL);
+
+      if (!mainProgram) {
+        *error = embed_fail;
+        return nullptr;
+      }
+
+      void *kernel_ptr_symbol = dlsym(mainProgram,kernel_ptr_symbol_name);
+      if (!kernel_ptr_symbol) *error = kernel_not_found;
+      if (!kernel_ptr_symbol) return nullptr;
+
+      void *kernel_len_symbol = dlsym(mainProgram,kernel_len_symbol_name);
+      if (!kernel_len_symbol) *error = kernel_size_is_wrong;
+      if (!kernel_len_symbol) return nullptr;
+
+      *kernelLength = *(size_t *)kernel_len_symbol;
+      char *kernel_src = (char *)kernel_ptr_symbol;
+
 #if CLH_PRINT_EMBEDDED_PROGRAM_SOURCE
-    printf("(begin sanity check)\n");
+      printf("(begin sanity check)\n");
     printf("source size: %li\n",*kernelLength);
     
     for (int i=0;i<*kernelLength;i++)
       printf("%c",kernel_src[i]);
     printf("(end sanity)\n");
 #endif
-    return kernel_src;
-  }
+      return kernel_src;
+    }
 
-  /*! get a std::string that contains the embedded OpenCL code. If the
-    given file name couldn't be found among the embedded opencl codes
-    a std::runtime_error will be thrown */
-  std::string getEmbeddedProgram(const std::string &clFileName)
-  {
-    size_t len;
-    const char *programSrc = clhGetEmbeddedProgram(clFileName.c_str(),&len);
-    if (!programSrc)
-      throw std::runtime_error("could not find embedded opencl code for '"+clFileName+"'");
-    std::stringstream ss;
-    for (int i=0;i<len;i++)
-      ss << programSrc[i];
-    return ss.str();
-  }
+    /*! get a std::string that contains the embedded OpenCL code. If the
+      given file name couldn't be found among the embedded opencl codes
+      a std::runtime_error will be thrown */
+    std::string getEmbeddedProgram(const std::string &clFileName)
+    {
+
+      size_t len;
+
+      embed_error error;
+
+      const char *programSrc = clhGetEmbeddedProgram(clFileName.c_str(), &len, &error);
+
+      if (!programSrc) {
+        std::string mess;
+        switch (error) {
+          case embed_fail:
+            mess = "embedding source is corrupted"; break;
+          case kernel_not_found:
+            mess = "kernel source is not found"; break;
+          case kernel_size_is_wrong:
+            mess = "kernel source size is wrong"; break;
+        }
+        throw std::runtime_error("could not find embedded opencl code for '" + clFileName + "' error: " + mess);
+      }
+
+      std::stringstream ss;
+
+      for (int i=0;i<len;i++)
+        ss << programSrc[i];
+
+      return ss.str();
+    }
 
 
 } // ::clHelper
