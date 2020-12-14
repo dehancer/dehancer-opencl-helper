@@ -59,7 +59,7 @@ namespace clHelper {
       if (!kernel_len_symbol) *error = kernel_size_is_wrong;
       if (!kernel_len_symbol) return nullptr;
 
-      *kernelLength = *(size_t *)kernel_len_symbol;
+      *kernelLength = *(unsigned int*)kernel_len_symbol;
       char *kernel_src = (char *)kernel_ptr_symbol;
 
 #if CLH_PRINT_EMBEDDED_PROGRAM_SOURCE
