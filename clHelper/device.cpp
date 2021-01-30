@@ -197,10 +197,15 @@ namespace clHelper {
       size_t numPlatforms = getNumPlatforms();
   
       for (int pID = 0; pID < numPlatforms; pID++) {
-    
-        std::shared_ptr<Platform> platform = getPlatformInfo(pID);
-        for (auto device : platform->devices)
-          ret.push_back(device);
+  
+        try {
+          std::shared_ptr<Platform> platform = getPlatformInfo(pID);
+          for (auto device : platform->devices)
+            ret.push_back(device);
+        }
+        catch (const std::runtime_error &e) {
+          continue;
+        }
       }
     }
     catch (const std::runtime_error &e) {
