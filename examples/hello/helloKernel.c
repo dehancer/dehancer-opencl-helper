@@ -9,6 +9,8 @@
 /* extern char _expanded_opencl__hello_cl[]; */
 /* extern unsigned int _expanded_opencl__hello_cl_len; */
 
+extern char helloKernel_cl[];
+extern unsigned int helloKernel_cl_len;
 
 int main()
 {
@@ -29,16 +31,24 @@ int main()
   /* char fileName[] = "../hello.cl"; */
   /* const char *source_str = _expanded_opencl__hello_cl; */
   /* const size_t source_size = _expanded_opencl__hello_cl_len; */
-  size_t source_size;
-  //const char *source_str = clhGetEmbeddedProgram("hello.cl",&source_size);
-  const char *source_str = clhGetEmbeddedProgram("exampleKernel.cl",&source_size);
+  
+  const char *source_str = helloKernel_cl;
+  size_t source_size = helloKernel_cl_len;
+  //char *source_str = clhGetEmbeddedProgram("helloKernel.cl",&source_size);
+  //const char *source_str = clhGetEmbeddedProgram("exampleKernel.cl",&source_size);
 
   if (!source_str) {
-    printf("could not find embedded program 'hello.cl'\n");
+    printf("could not find embedded program 'helloKernel.cl'\n");
     exit(1);
   }
-     
-  ret = clGetPlatformIDs(1, &platform_id, &ret_num_platforms);
+  
+  ret = clGetPlatformIDs(0,NULL,&ret_num_platforms);
+  cl_platform_id clPlatformIDs[ret_num_platforms];
+  ret = clGetPlatformIDs(ret_num_platforms, clPlatformIDs, NULL);
+  platform_id = clPlatformIDs[0];
+  //ret = clGetPlatformIDs(1, &platform_id, &ret_num_platforms);
+  printf("found num platforms: %d\n",ret_num_platforms);
+  
   ret = clGetDeviceIDs(platform_id, CL_DEVICE_TYPE_DEFAULT, 1, &device_id, &ret_num_devices);
   printf("found num devices: %d\n",ret_num_devices);
 

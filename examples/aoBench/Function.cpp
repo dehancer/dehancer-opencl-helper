@@ -5,6 +5,9 @@
 #include "Function.h"
 #include <cstring>
 
+extern char exampleKernel_cl[];
+extern unsigned int exampleKernel_cl_len;
+
 namespace dehancer::opencl::example  {
     Function::Function(const void *command_queue,
                        const std::string &kernel_name
@@ -24,10 +27,13 @@ namespace dehancer::opencl::example  {
         throw std::runtime_error("Unable to get OpenCL context");
       }
 
-      const std::string source = clHelper::getEmbeddedProgram("exampleKernel.cl");
-
-      const char *source_str = source.c_str();
-      size_t source_size = source.size();
+      //const std::string source = exampleKernel_cl;//clHelper::getEmbeddedProgram("exampleKernel.cl");
+      //const char *source_str = source.c_str();
+      //size_t source_size = source.size();
+  
+      const char *source_str = exampleKernel_cl;
+      size_t source_size = exampleKernel_cl_len;
+      
       program_ = clCreateProgramWithSource(context_, 1, (const char **) &source_str,
                                            (const size_t *) &source_size, &last_error_);
 

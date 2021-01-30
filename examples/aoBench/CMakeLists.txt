@@ -2,7 +2,7 @@
 INCLUDE(${clHelper_DIR}/clHelper.cmake)
 
 COMPILE_OPENCL(
-        ../shaders/exampleKernel.cl
+        exampleKernel.cl
 )
 
 OPENCL_INCLUDE_DIRECTORIES(

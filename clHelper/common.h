@@ -39,7 +39,7 @@
   
   /*! helper macro that checks the return value of all MPI_xxx(...)
     calls via MPI_CALL(xxx(...)).  */
-#define CL_CALL(a) { cl_int rc = cl##a; if (rc != CL_SUCCESS) throw std::runtime_error("opencl call returned error in " CLH_STRING(a)); }
+#define CL_CALL(a) { cl_int rc = cl##a; if (rc != CL_SUCCESS) throw std::runtime_error("opencl call returned error " + std::to_string(rc) + " in " CLH_STRING(a)); }
 
 #ifdef __cplusplus  
 namespace clHelper {

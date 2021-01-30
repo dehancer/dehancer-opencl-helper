@@ -1,6 +1,7 @@
 
 INCLUDE(${clHelper_DIR}/clHelper.cmake)
-COMPILE_OPENCL(../shaders/exampleKernel.cl)
+
+COMPILE_OPENCL(helloKernel.cl)
 
 ADD_EXECUTABLE(example_hello
         helloKernel.c

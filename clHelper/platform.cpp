@@ -48,7 +48,9 @@ namespace clHelper {
     std::vector<std::shared_ptr<Device>> devices;
 
     cl_uint numDevices;
+    
     CL_CALL(GetDeviceIDs(clPlatformID,CL_DEVICE_TYPE_ALL,0,NULL,&numDevices));
+    
     cl_device_id clDeviceIDs[numDevices];
     CL_CALL(GetDeviceIDs(clPlatformID,CL_DEVICE_TYPE_ALL,numDevices,clDeviceIDs,NULL));
     
