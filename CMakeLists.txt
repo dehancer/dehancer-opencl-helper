@@ -4,7 +4,7 @@ cmake_minimum_required(VERSION 3.12)
 # Project
 #
 set (PROJECT_LIB dehancer_opencl_helper)
-set (DEHANCER_OPENSCL_VERSION 1)
+set (DEHANCER_OPENCL_VERSION 1)
 option(BUILD_TESTING OFF)
 
 project(${PROJECT_LIB} VERSION 0.0.1)
