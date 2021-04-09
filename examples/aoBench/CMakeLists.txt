@@ -19,5 +19,6 @@ ADD_EXECUTABLE(example_aoBench
 
 TARGET_LINK_LIBRARIES(example_aoBench
         clHelperLib
+        ${CMAKE_DL_LIBS}
         )
 
