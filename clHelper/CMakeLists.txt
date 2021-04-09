@@ -5,15 +5,15 @@ FILE(GLOB PUBLIC_INCLUDE_FILES
         )
 
 ADD_LIBRARY(clHelperLib STATIC
-  embeddedProgram.cpp
-  device.cpp
+        embeddedProgram.cpp
+        device.cpp
         platform.cpp
         )
 
-TARGET_LINK_LIBRARIES(clHelperLib 
-  ${OpenCL_LIBRARY}
-  dl
-  )
+TARGET_LINK_LIBRARIES(clHelperLib
+        ${OpenCL_LIBRARY}
+        ${CMAKE_DL_LIBS}
+        )
 
 SET_PROPERTY(TARGET clHelperLib PROPERTY POSITION_INDEPENDENT_CODE ON)
 
