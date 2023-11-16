@@ -22,9 +22,8 @@
 #include <CL/cl.h>
 #endif
 
-#include <sys/types.h>
-
 #ifdef __cplusplus
+#include <sys/types.h>
 #include <string>
 #include <iostream>
 #include <memory>
@@ -54,7 +53,7 @@ namespace clHelper {
     else if (val >= 1e+09f) sprintf(result,"%.1f%c",val/1e09f,'G');
     else if (val >= 1e+06f) sprintf(result,"%.1f%c",val/1e06f,'M');
     else if (val >= 1e+03f) sprintf(result,"%.1f%c",val/1e03f,'k');
-    else sprintf(result,"%lu",(size_t)val);
+    else sprintf(result,"%zu",(size_t)val);
     return result;
   }
 
@@ -75,7 +74,7 @@ namespace clHelper {
     else if (val >= giga) sprintf(result,"%.1f%c",val/giga,'G');
     else if (val >= mega) sprintf(result,"%.1f%c",val/mega,'M');
     else if (val >= kilo) sprintf(result,"%.1f%c",val/kilo,'k');
-    else sprintf(result,"%lu",(size_t)val);
+    else sprintf(result,"%f",val);
     return result;
   }
   

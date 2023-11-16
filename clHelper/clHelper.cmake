@@ -200,14 +200,14 @@ MACRO (COMPILE_OPENCL)
 			FILE(RELATIVE_PATH rel_preproc_file ${CMAKE_BINARY_DIR} ${preproc_file})
 			ADD_CUSTOM_COMMAND(
 					OUTPUT ${preproc_file}
-					COMMAND clang -E -DCLANG_OPENCL
+					COMMAND clang -E -DCLANG_OPENCL -cl-std=CL3.0 -Xclang -finclude-default-header
 					${CLHELPER_INCLUDE_DIRS}
 					${CLHELPER_DEFINITIONS}
 					${OPENCL_DEFINITIONS}
 					${input_file}
 					-o ${preproc_file}
 					DEPENDS ${input_file} ${deps} ${dep_file}
-					COMMENT "Run pre-processor on ${src} -> ${rel_preproc_file}"
+					COMMENT "Run pre-processor on ${src} -> ${rel_preproc_file}, ${CLHELPER_INCLUDE_DIRS} ${CLHELPER_DEFINITIONS} ${OPENCL_DEFINITIONS} ${input_file}"
 			)
 
 			# ------------------------------------------------------------------
