@@ -98,8 +98,9 @@ namespace clHelper {
 
   Device::Device(const cl_device_id clDeviceID,
                  const size_t platformID)
-    : clDeviceID(clDeviceID),
-      platformID(platformID)
+    :
+    platformID(platformID),
+    clDeviceID(clDeviceID)
   {
   }
   
