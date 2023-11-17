@@ -5,8 +5,8 @@
 #include "Function.h"
 #include <cstring>
 
-extern char exampleKernel_cl[];
-extern unsigned int exampleKernel_cl_len;
+extern "C" char exampleKernel_cl[];
+extern "C" unsigned int exampleKernel_cl_len;
 
 namespace dehancer::opencl::example  {
     Function::Function(const void *command_queue,
