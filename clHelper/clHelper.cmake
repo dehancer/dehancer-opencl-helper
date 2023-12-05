@@ -20,13 +20,11 @@
 # ------------------------------------------------------------------
 # find basic opencl runtime components
 # ------------------------------------------------------------------
-FIND_PACKAGE(OpenCL 1.2 REQUIRED)
+FIND_PACKAGE(OpenCL REQUIRED)
 IF (NOT OpenCL_INCLUDE_DIRS)
 	MESSAGE(ERROR "OpenCL runtime not found")
 ENDIF()
 INCLUDE_DIRECTORIES(${OpenCL_INCLUDE_DIRS})
-
-message("OpenCL_LIBRARIES: " ${OpenCL_LIBRARIES})
 
 # enable C++-17
 SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-deprecated-declarations")
@@ -200,7 +198,7 @@ MACRO (COMPILE_OPENCL)
 			FILE(RELATIVE_PATH rel_preproc_file ${CMAKE_BINARY_DIR} ${preproc_file})
 			ADD_CUSTOM_COMMAND(
 					OUTPUT ${preproc_file}
-					COMMAND clang -E -DCLANG_OPENCL
+					COMMAND clang -E -DCLANG_OPENCL -cl-std=CL1.2 -cl-no-stdinc -DCL_TARGET_OPENCL_VERSION=120
 					${CLHELPER_INCLUDE_DIRS}
 					${CLHELPER_DEFINITIONS}
 					${OPENCL_DEFINITIONS}

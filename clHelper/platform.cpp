@@ -33,13 +33,14 @@ namespace clHelper {
                      const std::string &profile,
                      const std::string &extensions,
                      const std::vector<std::shared_ptr<Device>> &devices)
-    : clPlatformID(clPlatformID),
-      vendor(vendor),
-      name(name),
-      version(version),
-      profile(profile),
-      extensions(extensions),
-      devices(devices)
+    :
+    devices(devices),
+    clPlatformID(clPlatformID),
+    profile(profile),
+    version(version),
+    vendor(vendor),
+    name(name),
+    extensions(extensions)
   {}
 
   std::vector<std::shared_ptr<Device>> queryDevicesForPlatform(cl_platform_id clPlatformID,

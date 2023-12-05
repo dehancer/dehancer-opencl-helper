@@ -21,7 +21,7 @@ void Image::savePPM(const char *fname) const
   }
 
   fprintf(fp, "P6\n");
-  fprintf(fp, "%ld %ld\n", width, height);
+  fprintf(fp, "%zu %zu\n", width, height);
   fprintf(fp, "255\n");
   fwrite(tmp, width*height*3, 1, fp);
   fclose(fp);

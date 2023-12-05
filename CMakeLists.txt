@@ -3,6 +3,7 @@ cmake_minimum_required(VERSION 3.12)
 #
 # Project
 #
+set(CMAKE_CXX_STANDARD 17)
 set (PROJECT_LIB dehancer_opencl_helper)
 set (DEHANCER_OPENCL_VERSION 1)
 option(BUILD_TESTING OFF)
@@ -19,12 +20,13 @@ if(PRINT_DEBUG)
     set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -DPRINT_DEBUG=1")
 endif()
 
+add_definitions(-DCL_TARGET_OPENCL_VERSION=120)
 
 if (WIN32)
 
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -EHsc -Wno-deprecated-declarations")
     set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /MTd")
-    add_definitions(/MT /DWIN32=1 /D_ITERATOR_DEBUG_LEVEL=0)
+    add_definitions(/MT /DWIN32=1 /D_ITERATOR_DEBUG_LEVEL=0 /D_USE_MATH_DEFINES)
     string(TOLOWER  ${CMAKE_BUILD_TYPE} BUILD_TYPE)
     if (${BUILD_TYPE} STREQUAL "debug")
         add_definitions(/MTd /D_ALLOW_ITERATOR_DEBUG_LEVEL_MISMATCH=1 /D_HAS_ITERATOR_DEBUGGING=0)

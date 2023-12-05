@@ -1,7 +1,8 @@
-#include <stdio.h>
-#include <stdlib.h>
+#include <cstdio>
+#include <cstdlib>
      
 #include "clHelper/embeddedProgram.h"
+#include <string>
 
 #define MEM_SIZE (128)
 #define MAX_SOURCE_SIZE (0x100000)
@@ -9,8 +10,8 @@
 /* extern char _expanded_opencl__hello_cl[]; */
 /* extern unsigned int _expanded_opencl__hello_cl_len; */
 
-extern char helloKernel_cl[];
-extern unsigned int helloKernel_cl_len;
+extern "C" char helloKernel_cl[];
+extern "C" unsigned int helloKernel_cl_len;
 
 int main()
 {
@@ -42,9 +43,9 @@ int main()
     exit(1);
   }
   
-  ret = clGetPlatformIDs(0,NULL,&ret_num_platforms);
+  ret = clGetPlatformIDs(0,nullptr,&ret_num_platforms);
   cl_platform_id clPlatformIDs[ret_num_platforms];
-  ret = clGetPlatformIDs(ret_num_platforms, clPlatformIDs, NULL);
+  ret = clGetPlatformIDs(ret_num_platforms, clPlatformIDs, nullptr);
   platform_id = clPlatformIDs[0];
   //ret = clGetPlatformIDs(1, &platform_id, &ret_num_platforms);
   printf("found num platforms: %d\n",ret_num_platforms);
@@ -53,28 +54,46 @@ int main()
   printf("found num devices: %d\n",ret_num_devices);
 
   /* Create OpenCL context */
-  context = clCreateContext(NULL, 1, &device_id, NULL, NULL, &ret);
+  context = clCreateContext(nullptr, 1, &device_id, nullptr, nullptr, &ret);
      
   /* Create Command Queue */
   command_queue = clCreateCommandQueue(context, device_id, 0, &ret); 
   /* command_queue = clCreateCommandQueueWithProperties(context, device_id, 0, &ret); */
      
   /* Create Memory Buffer */
-  memobj = clCreateBuffer(context, CL_MEM_READ_WRITE,MEM_SIZE * sizeof(char), NULL, &ret);
+  memobj = clCreateBuffer(context, CL_MEM_READ_WRITE,MEM_SIZE * sizeof(char), nullptr, &ret);
      
-  /* printf("(begin sanity check)\n"); */
-  /* printf("source size: %i\n",source_size); */
-  /* for (int i=0;i<source_size;i++) */
-  /*   printf("%c",source_str[i]); */
+   printf("(begin sanity check)\n");
+   printf("source size: %zu\n", source_size);
+   for (int i=0;i<source_size;i++)
+      printf("%c",source_str[i]);
   /*   /\* printf("%i: %c\n",i,source_str[i]); *\/ */
-  /* printf("(end sanity)\n"); */
-  /* Create Kernel Program from the source */
+   printf("(end sanity)\n");
+
+   /* Create Kernel Program from the source */
   program = clCreateProgramWithSource(context, 1, (const char **)&source_str,
                                       (const size_t *)&source_size, &ret);
 
   /* Build Kernel Program */
-  ret = clBuildProgram(program, 1, &device_id, NULL, NULL, NULL);
-     
+  ret = clBuildProgram(program, 1, &device_id, nullptr, nullptr, nullptr);
+
+  if (ret != CL_SUCCESS) {
+
+    std::string log = std::string("Unable to build OpenCL program from: ") + "hello";
+
+    // Determine the size of the log
+    size_t log_size;
+    clGetProgramBuildInfo(program, device_id, CL_PROGRAM_BUILD_LOG, 0, nullptr, &log_size);
+    log.resize(log_size);
+
+    // Get the log
+    clGetProgramBuildInfo(program, device_id, CL_PROGRAM_BUILD_LOG, log_size, log.data(), nullptr);
+
+    std::cerr << log << std::endl;
+
+    return -1;
+  }
+
   /* Create OpenCL Kernel */
   kernel = clCreateKernel(program, "hello", &ret);
      
