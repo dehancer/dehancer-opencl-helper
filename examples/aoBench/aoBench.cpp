@@ -68,7 +68,7 @@
 // clhelper
 
 #include "dehancer/opencl/embeddedProgram.h"
-#include "clHelper/device.h"
+#include "dehancer/opencl/device.h"
 #include "Image.h"
 #include "Function.h"
 
