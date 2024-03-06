@@ -14,7 +14,7 @@
 // limitations under the License.                                           //
 // ======================================================================== //
 
-#include "embeddedProgram.h"
+#include "dehancer/opencl/embeddedProgram.h"
 #include <dlfcn.h>
 #include <sstream>
 #include <cstdio>
