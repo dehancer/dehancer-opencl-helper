@@ -25,7 +25,7 @@ IF (NOT OpenCL_INCLUDE_DIRS)
 	MESSAGE(ERROR "OpenCL runtime not found")
 ENDIF()
 INCLUDE_DIRECTORIES(${OpenCL_INCLUDE_DIRS})
-
+INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR})
 # enable C++-17
 SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-deprecated-declarations")
 SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-deprecated-declarations -std=c++17")
