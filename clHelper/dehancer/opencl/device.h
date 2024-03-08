@@ -16,7 +16,7 @@
 
 #pragma once
 
-#include "common.h"
+#include "dehancer/opencl/common.h"
 #include <memory>
 
 namespace clHelper {

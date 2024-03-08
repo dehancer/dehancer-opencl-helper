@@ -14,8 +14,8 @@
 // limitations under the License.                                           //
 // ======================================================================== //
 
-#include "device.h"
-#include "platform.h"
+#include "dehancer/opencl/device.h"
+#include "dehancer/opencl/platform.h"
 
 namespace clHelper {
 

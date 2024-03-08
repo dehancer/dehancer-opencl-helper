@@ -14,7 +14,7 @@
 // limitations under the License.                                           //
 // ======================================================================== //
 
-#include "platform.h"
+#include "dehancer/opencl/platform.h"
 
 namespace clHelper {
 

@@ -16,7 +16,8 @@
 
 #pragma once
 
-#include "common.h"
+#include "dehancer/opencl/common.h"
+
 #ifdef __APPLE__
 #include <OpenCL/opencl.h>
 #else

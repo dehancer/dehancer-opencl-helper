@@ -16,7 +16,7 @@
 
 #pragma once
 
-#include "device.h"
+#include "dehancer/opencl/device.h"
 
 namespace clHelper {
 
