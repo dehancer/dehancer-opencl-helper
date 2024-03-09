@@ -8,7 +8,7 @@ set (PROJECT_LIB dehancer_opencl_helper)
 set (DEHANCER_OPENCL_VERSION 1)
 option(OPENCL_HELPER_TEST OFF)
 
-project(${PROJECT_LIB} VERSION 0.1.0)
+project(${PROJECT_LIB} VERSION 0.5.0)
 
 if (NOT CMAKE_INSTALL_LIBDIR)
     set(CMAKE_INSTALL_LIBDIR lib)
