@@ -7,8 +7,8 @@
 #include <string>
 #include <functional>
 
-#include "clHelper/common.h"
-#include "clHelper/embeddedProgram.h"
+#include "dehancer/opencl/common.h"
+#include "dehancer/opencl/embeddedProgram.h"
 
 namespace dehancer::opencl::example {
 

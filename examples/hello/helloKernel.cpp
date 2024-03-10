@@ -1,7 +1,7 @@
 #include <cstdio>
 #include <cstdlib>
      
-#include "clHelper/embeddedProgram.h"
+#include "dehancer/opencl/embeddedProgram.h"
 #include <string>
 
 #define MEM_SIZE (128)

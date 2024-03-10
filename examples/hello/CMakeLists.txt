@@ -1,5 +1,6 @@
 
 INCLUDE(${clHelper_DIR}/clHelper.cmake)
+INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/clHelper)
 
 COMPILE_OPENCL(helloKernel.cl)
 

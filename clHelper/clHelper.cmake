@@ -25,7 +25,7 @@ IF (NOT OpenCL_INCLUDE_DIRS)
 	MESSAGE(ERROR "OpenCL runtime not found")
 ENDIF()
 INCLUDE_DIRECTORIES(${OpenCL_INCLUDE_DIRS})
-
+INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR})
 # enable C++-17
 SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-deprecated-declarations")
 SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-deprecated-declarations")
@@ -196,9 +196,18 @@ MACRO (COMPILE_OPENCL)
 			# gets embedded as a compile-time string into the executable
 			# ------------------------------------------------------------------
 			FILE(RELATIVE_PATH rel_preproc_file ${CMAKE_BINARY_DIR} ${preproc_file})
+
+			if (CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL 14.0)
+				set(CLHELPER_NO_STDINC "-cl-no-stdinc")
+			else ()
+				set(CLHELPER_NO_STDINC "")
+			endif ()
+
+			message("CLHELPER_NO_STDINC: ${CLHELPER_NO_STDINC}")
+
 			ADD_CUSTOM_COMMAND(
 					OUTPUT ${preproc_file}
-					COMMAND clang -E -DCLANG_OPENCL -cl-std=CL1.2 -cl-no-stdinc -DCL_TARGET_OPENCL_VERSION=120
+					COMMAND ${CLANG_COMPILER} -E -DCLANG_OPENCL -DCLANG_OPENCL_PREPROC=1 -cl-std=CL1.2 ${CLHELPER_NO_STDINC} -DCL_TARGET_OPENCL_VERSION=120
 					${CLHELPER_INCLUDE_DIRS}
 					${CLHELPER_DEFINITIONS}
 					${OPENCL_DEFINITIONS}
@@ -207,6 +216,7 @@ MACRO (COMPILE_OPENCL)
 					DEPENDS ${input_file} ${deps} ${dep_file}
 					COMMENT "Run pre-processor on ${src} -> ${rel_preproc_file}"
 			)
+
 
 			# ------------------------------------------------------------------
 			# command to generate .s output file
