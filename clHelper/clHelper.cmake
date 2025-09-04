@@ -53,7 +53,7 @@ ENDIF()
 # ------------------------------------------------------------------
 # list of all directories the user specified for his opencl kernels
 # (using OPENCL_INCLUDE_DIRECTORIES(<dir>)
-SET(CLHELPER_INCLUDE_DIRS "")
+SET(CLHELPER_INCLUDE_DIRS "${CLHELPER_INCLUDE_DIRS}")
 MACRO (OPENCL_INCLUDE_DIRECTORIES)
 	foreach(src ${ARGN})
 		set(CLHELPER_INCLUDE_DIRS ${CLHELPER_INCLUDE_DIRS} -I${src})
