@@ -30,6 +30,13 @@ INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR})
 SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-deprecated-declarations")
 SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-deprecated-declarations")
 
+# Allow the caller to override the OpenCL standard version; default to 2.0
+IF (NOT DEFINED CL_STD_VERSION OR CL_STD_VERSION STREQUAL "")
+	SET(CL_STD_VERSION "2.0")
+ELSE()
+	MESSAGE("Defined CL_STD_VERSION = ${CL_STD_VERSION}")
+ENDIF ()
+
 # ------------------------------------------------------------------
 # find a opencl cmd-line compiler
 # ------------------------------------------------------------------
@@ -229,7 +236,7 @@ MACRO (COMPILE_OPENCL)
 					-cmd=build
 					-input=${preproc_file}
 					-asm=${asm_file}
-					-bo="-cl-std=CL2.0"
+					-bo="-cl-std=CL${CL_STD_VERSION}"
 					DEPENDS ${preproc_file}
 					COMMENT "test-compiling ${rel_preproc_file} -> ${rel_asm_file}"
 			)
@@ -245,7 +252,7 @@ MACRO (COMPILE_OPENCL)
 					-cmd=build
 					-input=${preproc_file}
 					-llvm=${ll_file}
-					-bo="-cl-std=CL2.0"
+					-bo="-cl-std=CL${CL_STD_VERSION}"
 					DEPENDS ${preproc_file}
 					COMMENT "test-compiling ${rel_preproc_file} -> ${rel_ll_file}"
 			)
