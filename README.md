@@ -1,154 +1,78 @@
-OpenCL-Helpers - Some Helper Infrastructure for building OpenCL based Projects w/ CMake
-=======================================================================================
+# Build and install
 
-Sources: https://github.com/ingowald/OpenCLHelper
+Requires CMake 4.3+, a C++17 compiler, and OpenCL 1.2 development headers and loader.
+Windows also requires the `dlfcn-win32` CMake package (`dlfcn-win32::dl`).
+macOS uses the SDK's OpenCL framework.
 
-Introduction
-============
+```sh
+cmake -S . -B build \
+  -G "Ninja Multi-Config" \
+  -DOPENCL_HELPER_TEST=OFF \
+  -DCMAKE_PREFIX_PATH=$HOME/local-dehancer \
 
-Whehter on is a fan of OpenCL or not, and no matter whatever
-limitations OpenCL may or may not have as a _language_, the key issues
-I stumbled over in my working with OpenCL were actually mostly related
-to the build system - cl kernels only being compiled during runtime,
-the app not finding the right .cl files during runtime, hash-include's
-and hash-define's in cl kernels causing problems when running the
-executable from a different directory than intended, compile errors in
-the cl-file only appearing when the cl code is jit'ed during program
-execution, etc.
+cmake --build build --config Release --parallel $(nproc)
+cmake --install build --config Release --prefix $HOME/local-dehancer
+```
 
-This project aims at fixing this through a set of cmake and c++ helper
-functions. In particular, this library
+The library remains static, named `clHelperLib`. No dependencies are downloaded.
+Existing `OpenCL::OpenCL` and `dlfcn-win32::dl` targets are reused. Examples are
+opt-in through `OPENCL_HELPER_TEST`; parent `BUILD_TESTING` does not enable them.
 
-- allows for build-time (pre-)compilation of all opencl-kernels
-- proper preprocessor-expansion (#include, #ifdef, ...) during
-  build time
-- cmake commands to specify OPENCL_INCLUDE_DIRS(...) and
-  OPENCL_ADD_DEFINITIONS(...) for .cl files
-- 'embedding' of properly preprocessor-expanded .cl-files
-  as global char[] arrays in .c files that can be linked
-  (and thus, embedded) into the application. Ie, cl file
-  "myFile.cl" will always be accesible through global symbols
+`CMAKE_INSTALL_LIBDIR` and `CMAKE_INSTALL_INCLUDEDIR` select subdirectories.
+Relative directories support relocation; absolute overrides remain fixed.
 
-        char myFile_cl[];
+# CMake consumption
 
-  and
+Installed package:
 
-        int myFile_cl_len;
+```cmake
+find_package(dehancer_opencl_helper CONFIG REQUIRED)
+target_link_libraries(my_library PRIVATE
+    dehancer_opencl_helper::dehancer_opencl_helper
+)
+```
 
-- some (optional) c/c++ helper functions to access these
-  embedded kernerls.
+Set `CMAKE_PREFIX_PATH` to the installation prefix.
 
-Usage
-=====
+Source checkout:
 
-To use this library, do roughly the following in your CMakeLists.txt
+```cmake
+add_subdirectory(path/to/dehancer-opencl-helper)
+target_link_libraries(my_library PRIVATE
+    dehancer_opencl_helper::dehancer_opencl_helper
+)
+```
 
-    SET(clHelper_DIR <path to this clHelper directory>)
-     
-    # this defines all the helper macros
-    INCLUDE(${clHelper_DIR}/clHelper.cmake)
+FetchContent with a local checkout:
 
-    # this builds the clHelper library (optional, if you want
-    # to manually access the globally generated symbols)
-    ADD_SUBDIRECTORY(${clHelper_DIR})
+```cmake
+include(FetchContent)
+FetchContent_Declare(dehancer_opencl_helper
+    SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/vendor/dehancer-opencl-helper"
+)
+FetchContent_MakeAvailable(dehancer_opencl_helper)
+target_link_libraries(my_library PRIVATE
+    dehancer_opencl_helper::dehancer_opencl_helper
+)
+```
 
-    # specify include paths for #include's in opencl files:
-    OPENCL_INCLUDE_DIRECTORIES(mySearchPath/subdir1 mySearchPath/subdir2)
+The target propagates headers, C++17, `CL_TARGET_OPENCL_VERSION=120`, OpenCL,
+and required loader linkage. Use `PUBLIC` when your public headers expose these
+headers. Include them as `<dehancer/opencl/device.h>`, for example.
 
-    # specify global defines for opencl files
-    OPENCL_ADD_DEFINITIONS(-DMY_DEFINE=32)
+# Embedded kernels
 
-    # compile some opencl kernels. This properly preprocessor-exapands
-    # and test-compiles the given .cl files (once to asm, once to llvm),
-    # and puts the preprocessor-expanded code (as a char[] array)
-    # into dedicated .c files (that can be accessed through the
-    # implicit EMBEDDED_OPENCL_KERNELS variable
-    COMPILE_OPENCL(myFile1.cl myFile2.cl)
+All three modes expose `COMPILE_OPENCL`, `OPENCL_INCLUDE_DIRECTORIES`, and
+`OPENCL_ADD_DEFINITION`. Kernel embedding requires `clang` and `xxd`; optional
+`ioc64` enables the legacy assembly/LLVM output. These tools are discovered only
+when `COMPILE_OPENCL` is used. Enable C in the consuming project for generated C:
 
-    # build a library/executable that embeds these kernels
-    ADD_LIBRARY(myLib
-	myFile1.c myFile2.c
-	${EMBEDDED_OPENCL_KERNELS})
+```cmake
+COMPILE_OPENCL(kernel.cl)
+target_sources(my_executable PRIVATE ${EMBEDDED_OPENCL_KERNELS})
+```
 
-From within the application the embedded kernels can be accessed
-through global variables
-
-    extern char myFile1_cl[];
-    extern int  myFile1_cl_len;
-
-or through the clHelper-library (in clHelper/ subdir)
-
-    size_t source_size;
-    const char *source_str = clhGetEmbeddedProgram("myFile1.cl",&source_size);
-
-respectively
-
-	std::string source = clHelper::getEmbeddedProgram("myFile1.cl")
-
-Note in particular in these examples the "myFile1.cl" is *not* an
-actual file that is opened during runtime, but that is fully expanded
-and embedded in the generated executable. Ie, the executable can be
-called from any directory, and can be shipped without the .cl files.
-
-
-Dependencies
-============
-
-To use this project you need
-
-- a reasonably new version of CMake
-- a c++-11 capable compiler (for the clHlper lib only, *not* for the cmake tools)
-- a opencl-capable from of clang, in your path
-- for he c++ clHelper library: some sort of OpenCL runtime and devel files
-  (ie, libOpenCL.so and CL/OpenCL.h) in a way that CMake's FindOpenCL can find it.
-
-
-License
-=======
-
-This project comes under MIT license, use as you see fit, without any
-warranties, expressed or implied, whatsoeever. See accompanying
-LICENSE.txt for details.
-
-
-History
-=======
-
-This project started Jan 2017, to help some experimentatoin with
-OpenCL.  The cmake build functionality was heavily inspired by - but
-significantly expanded from - the cmake macros the OSPRay project
-introduced to build ISPC files (see https://github.com/ospray/OSPRay,
-and more generally http://www.ospray.org). 
-
-Requirements 
-============
-
-    docker run  --name=centos8-opencl -t -i -v /Users/denn/Develop/Dehancer/Dehancer-Plugins:/home/Develop/Dehancer/Dehancer-Plugins  centos:centos8 /bin/bash
-    yum install yum-utils
-    yum makecache   
-    yum update
-    yum install clang 
-    yum install http://repo.okay.com.mx/centos/7/x86_64/release/okay-release-1-1.noarch.rpm
-    yum install libopencl-devel
-    dnf --enablerepo=PowerTools install opencl-headers
-    yum install ocl-icd
-    ln -s /usr/lib64/libOpenCL.so.1 /usr/lib/libOpenCL.so
-    yum install vim-common # xxd command 
-    
-    
-Install clang centos
-====================
-
-    yum install llvm-toolset-7
-    scl enable llvm-toolset-7 bash    
-    
-Install clang ubuntu
-====================
-
-    https://justiceboi.github.io/blog/install-clang-9-on-ubuntu/    
-    
-Update CMake 3.15
-=================
-
-    yum install wget
-    wget https://github.com/Kitware/CMake/releases/download/v3.15.2/cmake-3.15.2.tar.gz
+Kernel symbols must remain visible to `dlsym`. The target propagates executable
+export flags on Linux, FreeBSD, and macOS. Windows consumers must export their
+embedded kernel symbols. The standalone `lib/cmake/clHelper.cmake` installation
+path is retained.

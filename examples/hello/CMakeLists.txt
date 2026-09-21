@@ -1,7 +1,3 @@
-
-INCLUDE(${clHelper_DIR}/clHelper.cmake)
-INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/clHelper)
-
 COMPILE_OPENCL(helloKernel.cl)
 
 ADD_EXECUTABLE(example_hello
@@ -10,6 +6,5 @@ ADD_EXECUTABLE(example_hello
         )
 
 TARGET_LINK_LIBRARIES(example_hello
-        clHelperLib
+        dehancer_opencl_helper::dehancer_opencl_helper
         )
-

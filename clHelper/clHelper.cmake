@@ -14,46 +14,10 @@
 # // limitations under the License.                                           # //
 # // ======================================================================== # //
 
-# opencl.cmake - little helper tool to better integrate opencl files into
-# a cmake project. See README.md for usage instructoins
-#
-# ------------------------------------------------------------------
-# find basic opencl runtime components
-# ------------------------------------------------------------------
-FIND_PACKAGE(OpenCL REQUIRED)
-IF (NOT OpenCL_INCLUDE_DIRS)
-	MESSAGE(ERROR "OpenCL runtime not found")
-ENDIF()
-INCLUDE_DIRECTORIES(${OpenCL_INCLUDE_DIRS})
-INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR})
-# enable C++-17
-SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-deprecated-declarations")
-SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-deprecated-declarations")
-
-# ------------------------------------------------------------------
-# find a opencl cmd-line compiler
-# ------------------------------------------------------------------
-
-#FIND_PROGRAM(INTEL_OPENCL_COMPILER "ioc64" DOC "Intel OpenCL Compiler ('ioc64', from Intel OpenCL SDK)")
-FIND_PROGRAM(CLANG_COMPILER "clang" DOC "(OpenCL-capable) clang compiler")
-
-IF (#(NOT INTEL_OPENCL_COMPILER) AND
-(NOT CLANG_COMPILER))
-	#  MESSAGE("Could not find _either_ Intel or Clang OpenCL compiler.")
-	MESSAGE("Could not find Clang OpenCL compiler.")
-	MESSAGE("Will not be able to do command-line compilation (but runtime may still work)")
-ENDIF()
-
-FIND_PROGRAM(INTEL_OPENCL_COMPILER "ioc64" DOC "intel opencl cmd-line compiler")
-
-IF (NOT INTEL_OPENCL_COMPILER)
-	MESSAGE("Could not find intel OpenCL compiler (ioc64).")
-ENDIF()
-
 # ------------------------------------------------------------------
 # list of all directories the user specified for his opencl kernels
 # (using OPENCL_INCLUDE_DIRECTORIES(<dir>)
-SET(CLHELPER_INCLUDE_DIRS "")
+
 MACRO (OPENCL_INCLUDE_DIRECTORIES)
 	foreach(src ${ARGN})
 		set(CLHELPER_INCLUDE_DIRS ${CLHELPER_INCLUDE_DIRS} -I${src})
@@ -64,18 +28,11 @@ ENDMACRO ()
 # ------------------------------------------------------------------
 # list of all preprocessor definitions the user specified for his
 # opencl kernels (using OPENCL_ADD_DEFINITION(<dir>)
-SET(OPENCL_DEFINITIONS "")
+
 MACRO (OPENCL_ADD_DEFINITION)
 	SET(OPENCL_DEFINITIONS ${OPENCL_DEFINITIONS} ${ARGN})
 	message("new OPENCL_DEFINITIONS ${OPENCL_DEFINITIONS}")
 ENDMACRO ()
-
-# list of all asm-outputs we generated for .cl files
-SET(CLHELPER_ASM_FILES "")
-# list of all llvm-outputs we generated for .cl files
-SET(CLHELPER_LL_FILES "")
-# list of all dependency files we generates for .cl files
-SET(CLHELPER_DEP_FILES "")
 
 # ------------------------------------------------------------------
 # the main 'COMPILE_CL()' macro we use for compiling .cl files
@@ -96,6 +53,9 @@ SET(CLHELPER_DEP_FILES "")
 #     binary)
 # ------------------------------------------------------------------
 MACRO (COMPILE_OPENCL)
+	find_program(CLANG_COMPILER NAMES clang REQUIRED)
+	find_program(CLHELPER_XXD NAMES xxd REQUIRED)
+	find_program(INTEL_OPENCL_COMPILER NAMES ioc64)
 	SET(EMBEDDED_OPENCL_KERNELS "")
 
 	#  message("compile OPENCL_DEFINITIONS ${OPENCL_DEFINITIONS}")
@@ -107,7 +67,7 @@ MACRO (COMPILE_OPENCL)
 		GET_FILENAME_COMPONENT(rel_path ${src} PATH)
 
 		# the directory we're going to put all generated output files
-		SET(clhelper_base_output_dir ${CMAKE_BINARY_DIR}/.clhelper)
+		SET(clhelper_base_output_dir ${CMAKE_CURRENT_BINARY_DIR}/.clhelper)
 		SET(clhelper_output_dir ${clhelper_base_output_dir}/${rel_path})
 
 		# full path to the input file
@@ -175,7 +135,7 @@ MACRO (COMPILE_OPENCL)
 			# command to (re-)_generate_ a 'dep' file. this file is mainly
 			# used for dependency tracking during build
 			# ------------------------------------------------------------------
-			FILE(RELATIVE_PATH rel_dep_file ${CMAKE_BINARY_DIR} ${dep_file})
+			FILE(RELATIVE_PATH rel_dep_file ${CMAKE_CURRENT_BINARY_DIR} ${dep_file})
 			ADD_CUSTOM_COMMAND(
 					OUTPUT ${dep_file}
 					COMMAND ${CMAKE_COMMAND} -E make_directory ${clhelper_output_dir}
@@ -195,7 +155,7 @@ MACRO (COMPILE_OPENCL)
 			# #defines's etc expanded. this is the 'program' that actually
 			# gets embedded as a compile-time string into the executable
 			# ------------------------------------------------------------------
-			FILE(RELATIVE_PATH rel_preproc_file ${CMAKE_BINARY_DIR} ${preproc_file})
+			FILE(RELATIVE_PATH rel_preproc_file ${CMAKE_CURRENT_BINARY_DIR} ${preproc_file})
 
 			if (CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL 14.0)
 				set(CLHELPER_NO_STDINC "-cl-no-stdinc")
@@ -221,7 +181,7 @@ MACRO (COMPILE_OPENCL)
 			# ------------------------------------------------------------------
 			# command to generate .s output file
 			# ------------------------------------------------------------------
-			FILE(RELATIVE_PATH rel_asm_file ${CMAKE_BINARY_DIR} ${asm_file})
+			FILE(RELATIVE_PATH rel_asm_file ${CMAKE_CURRENT_BINARY_DIR} ${asm_file})
 			ADD_CUSTOM_COMMAND(
 					OUTPUT ${asm_file}
 					COMMAND ${INTEL_OPENCL_COMPILER}
@@ -237,7 +197,7 @@ MACRO (COMPILE_OPENCL)
 			# ------------------------------------------------------------------
 			# command to generate .ll output file
 			# ------------------------------------------------------------------
-			FILE(RELATIVE_PATH rel_ll_file ${CMAKE_BINARY_DIR} ${ll_file})
+			FILE(RELATIVE_PATH rel_ll_file ${CMAKE_CURRENT_BINARY_DIR} ${ll_file})
 			ADD_CUSTOM_COMMAND(
 					OUTPUT ${ll_file}
 					COMMAND ${INTEL_OPENCL_COMPILER}
@@ -263,7 +223,7 @@ MACRO (COMPILE_OPENCL)
 			ELSE()
 				SET(outputs ${preproc_file} ${deps})
 			ENDIF()
-			FILE(RELATIVE_PATH rel_embedded_file ${CMAKE_BINARY_DIR} ${embedded_file})
+			FILE(RELATIVE_PATH rel_embedded_file ${CMAKE_CURRENT_BINARY_DIR} ${embedded_file})
 			FILE(RELATIVE_PATH rel_input ${clhelper_base_output_dir} ${preproc_file})
 
 			message("{embedded_file} ${embedded_file}")
@@ -273,7 +233,7 @@ MACRO (COMPILE_OPENCL)
 			ADD_CUSTOM_COMMAND(
 					OUTPUT ${embedded_file}
 					WORKING_DIRECTORY ${clhelper_base_output_dir}
-					COMMAND xxd
+					COMMAND ${CLHELPER_XXD}
 					-i ${rel_input}
 					${embedded_file}
 					DEPENDS ${outputs}

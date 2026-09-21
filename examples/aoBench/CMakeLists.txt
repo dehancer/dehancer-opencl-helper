@@ -1,8 +1,3 @@
-
-INCLUDE(${clHelper_DIR}/clHelper.cmake)
-
-INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/clHelper)
-
 COMPILE_OPENCL(
         exampleKernel.cl
 )
@@ -20,7 +15,5 @@ ADD_EXECUTABLE(example_aoBench
         )
 
 TARGET_LINK_LIBRARIES(example_aoBench
-        clHelperLib
-        ${CMAKE_DL_LIBS}
+        dehancer_opencl_helper::dehancer_opencl_helper
         )
-

@@ -4,6 +4,7 @@ bin
 *.user*
 .idea*
 build*
+ci-build
 cmake-build-*
 *.sw?
 tags

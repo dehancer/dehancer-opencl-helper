@@ -1,68 +1,46 @@
-cmake_minimum_required(VERSION 3.12)
+cmake_minimum_required(VERSION 4.3)
 
-#
-# Project
-#
-set(CMAKE_CXX_STANDARD 17)
-set (PROJECT_LIB dehancer_opencl_helper)
-set (DEHANCER_OPENCL_VERSION 1)
-option(OPENCL_HELPER_TEST OFF)
+project(dehancer_opencl_helper VERSION 0.6.0 LANGUAGES C CXX)
 
-project(${PROJECT_LIB} VERSION 0.5.0)
+include(GNUInstallDirs)
+include(CMakePackageConfigHelpers)
 
-if (NOT CMAKE_INSTALL_LIBDIR)
-    set(CMAKE_INSTALL_LIBDIR lib)
-endif ()
+option(OPENCL_HELPER_TEST "Build OpenCL helper examples" OFF)
 
-set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -g")
-
-if(PRINT_DEBUG)
-    set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -DPRINT_DEBUG=1")
+if(NOT TARGET OpenCL::OpenCL)
+    find_package(OpenCL 1.2 REQUIRED)
+endif()
+if(WIN32 AND NOT TARGET dlfcn-win32::dl)
+    find_package(dlfcn-win32 CONFIG REQUIRED)
 endif()
 
-add_definitions(-DCL_TARGET_OPENCL_VERSION=120)
+add_subdirectory(clHelper)
+include(clHelper/clHelper.cmake)
 
-if (WIN32)
+set(dehancer_opencl_helper_cmake_install_dir "${CMAKE_INSTALL_LIBDIR}/cmake/dehancer_opencl_helper")
+configure_package_config_file(
+    cmake/Config.cmake.in
+    "${CMAKE_CURRENT_BINARY_DIR}/dehancer_opencl_helperConfig.cmake"
+    INSTALL_DESTINATION "${dehancer_opencl_helper_cmake_install_dir}"
+)
+write_basic_package_version_file(
+    "${CMAKE_CURRENT_BINARY_DIR}/dehancer_opencl_helperConfigVersion.cmake"
+    COMPATIBILITY SameMajorVersion
+)
+install(EXPORT dehancer_opencl_helperTargets
+    FILE dehancer_opencl_helperTargets.cmake
+    NAMESPACE dehancer_opencl_helper::
+    DESTINATION "${dehancer_opencl_helper_cmake_install_dir}"
+)
+install(FILES
+    "${CMAKE_CURRENT_BINARY_DIR}/dehancer_opencl_helperConfig.cmake"
+    "${CMAKE_CURRENT_BINARY_DIR}/dehancer_opencl_helperConfigVersion.cmake"
+    clHelper/clHelper.cmake
+    DESTINATION "${dehancer_opencl_helper_cmake_install_dir}"
+)
+# Preserve the standalone kernel helper's installation path.
+install(FILES clHelper/clHelper.cmake DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake")
 
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -EHsc -Wno-deprecated-declarations")
-    set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /MTd")
-    add_definitions(/MT /DWIN32=1 /D_ITERATOR_DEBUG_LEVEL=0 /D_USE_MATH_DEFINES)
-    string(TOLOWER  ${CMAKE_BUILD_TYPE} BUILD_TYPE)
-    if (${BUILD_TYPE} STREQUAL "debug")
-        add_definitions(/MTd /D_ALLOW_ITERATOR_DEBUG_LEVEL_MISMATCH=1 /D_HAS_ITERATOR_DEBUGGING=0)
-    endif()
-
-    set(VCPKG_BUILD_TYPE release)
-    set(VCPKG_LIBRARY_LINKAGE static)
-    SET(NODEFAULTLIB_COMPILE_FLAGS "-Zl")
-    SET(NODEFAULTLIB_LINK_FLAGS "")
-    SET(VCPKG_C_FLAGS  "${VCPKG_C_FLAGS} ${NODEFAULTLIB_COMPILE_FLAGS}")
-    SET(CMAKE_STATIC_LINKER_FLAGS "${CMAKE_STATIC_LINKER_FLAGS} ${NODEFAULTLIB_LINK_FLAGS}" )
-
-    find_package(dlfcn-win32 REQUIRED)
-
-    set(CMAKE_DL_LIBS dlfcn-win32::dl)
-
-    include_directories(
-            ${dlfcn-win32_INCLUDE_DIRS}
-    )
-
-else()
-    set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -O3")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC -rdynamic")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fvisibility=default -Wno-unused-command-line-argument")
-    set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -g")
-
-    set(CMAKE_DL_LIBS dl)
-endif ()
-
-set(CMAKE_MACOSX_RPATH TRUE)
-SET(clHelper_DIR ${CMAKE_CURRENT_SOURCE_DIR}/clHelper)
-INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR})
-
-SET(EXECUTABLE_OUTPUT_PATH ${CMAKE_CURRENT_BINARY_DIR})
-ADD_SUBDIRECTORY(${clHelper_DIR} clHelper_dir)
-
-if (OPENCL_HELPER_TEST)
-    ADD_SUBDIRECTORY(examples)
-endif ()
+if(OPENCL_HELPER_TEST)
+    add_subdirectory(examples)
+endif()
