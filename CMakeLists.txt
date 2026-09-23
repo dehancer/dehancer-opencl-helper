@@ -5,11 +5,12 @@ project(dehancer_opencl_helper VERSION 0.6.0 LANGUAGES C CXX)
 include(GNUInstallDirs)
 include(CMakePackageConfigHelpers)
 
-option(OPENCL_HELPER_TEST "Build OpenCL helper examples" OFF)
+option(BUILD_EXAMPLES "Build OpenCL helper examples" OFF)
 
 if(NOT TARGET OpenCL::OpenCL)
-    find_package(OpenCL 1.2 REQUIRED)
+    find_package(OpenCL 1.2 REQUIRED) # FIXME or 3.0?
 endif()
+
 if(WIN32 AND NOT TARGET dlfcn-win32::dl)
     find_package(dlfcn-win32 CONFIG REQUIRED)
 endif()
@@ -27,20 +28,23 @@ write_basic_package_version_file(
     "${CMAKE_CURRENT_BINARY_DIR}/dehancer_opencl_helperConfigVersion.cmake"
     COMPATIBILITY SameMajorVersion
 )
+
 install(EXPORT dehancer_opencl_helperTargets
     FILE dehancer_opencl_helperTargets.cmake
     NAMESPACE dehancer_opencl_helper::
     DESTINATION "${dehancer_opencl_helper_cmake_install_dir}"
 )
+
 install(FILES
     "${CMAKE_CURRENT_BINARY_DIR}/dehancer_opencl_helperConfig.cmake"
     "${CMAKE_CURRENT_BINARY_DIR}/dehancer_opencl_helperConfigVersion.cmake"
     clHelper/clHelper.cmake
     DESTINATION "${dehancer_opencl_helper_cmake_install_dir}"
 )
+
 # Preserve the standalone kernel helper's installation path.
 install(FILES clHelper/clHelper.cmake DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake")
 
-if(OPENCL_HELPER_TEST)
+if(BUILD_EXAMPLES)
     add_subdirectory(examples)
 endif()

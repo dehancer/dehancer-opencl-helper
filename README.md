@@ -6,8 +6,6 @@ macOS uses the SDK's OpenCL framework.
 
 ```sh
 cmake -S . -B build \
-  -G "Ninja Multi-Config" \
-  -DOPENCL_HELPER_TEST=OFF \
   -DCMAKE_PREFIX_PATH=$HOME/local-dehancer \
 
 cmake --build build --config Release --parallel $(nproc)
@@ -16,7 +14,7 @@ cmake --install build --config Release --prefix $HOME/local-dehancer
 
 The library remains static, named `clHelperLib`. No dependencies are downloaded.
 Existing `OpenCL::OpenCL` and `dlfcn-win32::dl` targets are reused. Examples are
-opt-in through `OPENCL_HELPER_TEST`; parent `BUILD_TESTING` does not enable them.
+opt-in through `OPENCL_BUILD_EXAMPLES`.
 
 `CMAKE_INSTALL_LIBDIR` and `CMAKE_INSTALL_INCLUDEDIR` select subdirectories.
 Relative directories support relocation; absolute overrides remain fixed.
