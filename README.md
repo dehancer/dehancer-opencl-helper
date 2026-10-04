@@ -1,15 +1,17 @@
 # Build and install
 
-Requires CMake 4.3+, a C++17 compiler, and OpenCL 1.2 development headers and loader.
+Requires CMake 4.3+, a C++17 compiler, and OpenCL 3.0 development headers and loader.
 Windows also requires the `dlfcn-win32` CMake package (`dlfcn-win32::dl`).
 macOS uses the SDK's OpenCL framework.
 
 ```sh
 cmake -S . -B build \
-  -DCMAKE_PREFIX_PATH=$HOME/local-dehancer \
+  -DCMAKE_MODULE_PATH=$linux_deps_install_dir/lib/cmake \
+  -DCMAKE_INSTALL_PREFIX=$HOME/dehancer-build \
+  -DCMAKE_BUILD_TYPE=Release
 
-cmake --build build --config Release --parallel $(nproc)
-cmake --install build --config Release --prefix $HOME/local-dehancer
+cmake --build build --parallel $(nproc)
+cmake --install build
 ```
 
 The library remains static, named `clHelperLib`. No dependencies are downloaded.
@@ -54,7 +56,7 @@ target_link_libraries(my_library PRIVATE
 )
 ```
 
-The target propagates headers, C++17, `CL_TARGET_OPENCL_VERSION=120`, OpenCL,
+The target propagates headers, C++17, `CL_TARGET_OPENCL_VERSION=300`, OpenCL,
 and required loader linkage. Use `PUBLIC` when your public headers expose these
 headers. Include them as `<dehancer/opencl/device.h>`, for example.
 

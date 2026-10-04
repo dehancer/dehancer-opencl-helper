@@ -6,7 +6,7 @@ add_library(clHelperLib STATIC
 add_library(dehancer_opencl_helper::dehancer_opencl_helper ALIAS clHelperLib)
 
 target_compile_features(clHelperLib PUBLIC cxx_std_17)
-target_compile_definitions(clHelperLib PUBLIC CL_TARGET_OPENCL_VERSION=120)
+target_compile_definitions(clHelperLib PUBLIC CL_TARGET_OPENCL_VERSION=300)
 target_link_libraries(clHelperLib PUBLIC OpenCL::OpenCL)
 target_sources(clHelperLib PUBLIC
     FILE_SET HEADERS

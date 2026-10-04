@@ -1,7 +1,7 @@
 @PACKAGE_INIT@
 
 include(CMakeFindDependencyMacro)
-find_dependency(OpenCL 1.2)
+find_dependency(OpenCL 3.0)
 if(WIN32)
     find_dependency(dlfcn-win32 CONFIG)
 endif()

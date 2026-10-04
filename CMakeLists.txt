@@ -7,7 +7,7 @@ include(CMakePackageConfigHelpers)
 
 option(OPENCL_BUILD_EXAMPLES "Build OpenCL helper examples" OFF)
 
-find_package(OpenCL 1.2 REQUIRED)
+find_package(OpenCL 3.0 REQUIRED)
 
 if(WIN32)
     find_package(dlfcn-win32 CONFIG REQUIRED)
