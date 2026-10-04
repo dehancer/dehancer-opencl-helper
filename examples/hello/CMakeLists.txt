@@ -1,10 +1,10 @@
-COMPILE_OPENCL(helloKernel.cl)
+compile_opencl(helloKernel.cl)
 
-ADD_EXECUTABLE(example_hello
-        helloKernel.cpp
-        ${EMBEDDED_OPENCL_KERNELS}
-        )
+add_executable(example_hello
+    helloKernel.cpp
+    ${EMBEDDED_OPENCL_KERNELS}
+)
 
-TARGET_LINK_LIBRARIES(example_hello
-        dehancer_opencl_helper::dehancer_opencl_helper
-        )
+target_link_libraries(example_hello
+    PRIVATE dehancer_opencl_helper::dehancer_opencl_helper
+)

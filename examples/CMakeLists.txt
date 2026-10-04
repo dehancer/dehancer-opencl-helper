@@ -1,2 +1,2 @@
-ADD_SUBDIRECTORY(hello)
-ADD_SUBDIRECTORY(aoBench)
+add_subdirectory(hello)
+add_subdirectory(aoBench)

@@ -61,9 +61,9 @@ headers. Include them as `<dehancer/opencl/device.h>`, for example.
 # Embedded kernels
 
 All three modes expose `COMPILE_OPENCL`, `OPENCL_INCLUDE_DIRECTORIES`, and
-`OPENCL_ADD_DEFINITION`. Kernel embedding requires `clang` and `xxd`; optional
-`ioc64` enables the legacy assembly/LLVM output. These tools are discovered only
-when `COMPILE_OPENCL` is used. Enable C in the consuming project for generated C:
+`OPENCL_ADD_DEFINITION`. Kernel embedding requires `clang` and `xxd`. These
+tools are discovered only when `COMPILE_OPENCL` is used. Enable C in the
+consuming project for generated C:
 
 ```cmake
 COMPILE_OPENCL(kernel.cl)

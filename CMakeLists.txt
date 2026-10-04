@@ -5,13 +5,11 @@ project(dehancer_opencl_helper VERSION 0.6.0 LANGUAGES C CXX)
 include(GNUInstallDirs)
 include(CMakePackageConfigHelpers)
 
-option(BUILD_EXAMPLES "Build OpenCL helper examples" OFF)
+option(OPENCL_BUILD_EXAMPLES "Build OpenCL helper examples" OFF)
 
-if(NOT TARGET OpenCL::OpenCL)
-    find_package(OpenCL 1.2 REQUIRED) # FIXME or 3.0?
-endif()
+find_package(OpenCL 1.2 REQUIRED)
 
-if(WIN32 AND NOT TARGET dlfcn-win32::dl)
+if(WIN32)
     find_package(dlfcn-win32 CONFIG REQUIRED)
 endif()
 
@@ -45,6 +43,6 @@ install(FILES
 # Preserve the standalone kernel helper's installation path.
 install(FILES clHelper/clHelper.cmake DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake")
 
-if(BUILD_EXAMPLES)
+if(OPENCL_BUILD_EXAMPLES)
     add_subdirectory(examples)
 endif()

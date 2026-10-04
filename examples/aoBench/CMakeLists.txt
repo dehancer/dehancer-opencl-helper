@@ -1,19 +1,17 @@
-COMPILE_OPENCL(
-        exampleKernel.cl
+compile_opencl(exampleKernel.cl)
+
+opencl_include_directories(
+    ./
+    ../shaders
 )
 
-OPENCL_INCLUDE_DIRECTORIES(
-        ./
-        ../shaders
+add_executable(example_aoBench
+    aoBench.cpp
+    Function.cpp
+    Image.cpp
+    ${EMBEDDED_OPENCL_KERNELS}
 )
 
-ADD_EXECUTABLE(example_aoBench
-        aoBench.cpp
-        Function.cpp
-        Image.cpp
-        ${EMBEDDED_OPENCL_KERNELS}
-        )
-
-TARGET_LINK_LIBRARIES(example_aoBench
-        dehancer_opencl_helper::dehancer_opencl_helper
-        )
+target_link_libraries(example_aoBench
+    PRIVATE dehancer_opencl_helper::dehancer_opencl_helper
+)
