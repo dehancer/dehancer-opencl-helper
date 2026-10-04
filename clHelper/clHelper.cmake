@@ -55,7 +55,6 @@ ENDMACRO ()
 MACRO (COMPILE_OPENCL)
 	find_program(CLANG_COMPILER NAMES clang REQUIRED)
 	find_program(CLHELPER_XXD NAMES xxd REQUIRED)
-	find_program(INTEL_OPENCL_COMPILER NAMES ioc64)
 	SET(EMBEDDED_OPENCL_KERNELS "")
 
 	#  message("compile OPENCL_DEFINITIONS ${OPENCL_DEFINITIONS}")
@@ -86,10 +85,6 @@ MACRO (COMPILE_OPENCL)
 
 		# the c-preprocessor output of the input file (generated using clang -E)
 		SET(preproc_file ${clhelper_output_dir}/${fname}.cl)
-
-		# the .ll and .s files we generate using clang's opencl compiler
-		SET(ll_file ${clhelper_output_dir}/${fname}.ll)
-		SET(asm_file ${clhelper_output_dir}/${fname}.s)
 
 		# the 'embedded' file that contains the (preprocessed) cl kernel
 		# embedded as a global array of char[]'s
@@ -179,38 +174,6 @@ MACRO (COMPILE_OPENCL)
 
 
 			# ------------------------------------------------------------------
-			# command to generate .s output file
-			# ------------------------------------------------------------------
-			FILE(RELATIVE_PATH rel_asm_file ${CMAKE_CURRENT_BINARY_DIR} ${asm_file})
-			ADD_CUSTOM_COMMAND(
-					OUTPUT ${asm_file}
-					COMMAND ${INTEL_OPENCL_COMPILER}
-					-device=cpu
-					-cmd=build
-					-input=${preproc_file}
-					-asm=${asm_file}
-					-bo="-cl-std=CL2.0"
-					DEPENDS ${preproc_file}
-					COMMENT "test-compiling ${rel_preproc_file} -> ${rel_asm_file}"
-			)
-
-			# ------------------------------------------------------------------
-			# command to generate .ll output file
-			# ------------------------------------------------------------------
-			FILE(RELATIVE_PATH rel_ll_file ${CMAKE_CURRENT_BINARY_DIR} ${ll_file})
-			ADD_CUSTOM_COMMAND(
-					OUTPUT ${ll_file}
-					COMMAND ${INTEL_OPENCL_COMPILER}
-					-device=cpu
-					-cmd=build
-					-input=${preproc_file}
-					-llvm=${ll_file}
-					-bo="-cl-std=CL2.0"
-					DEPENDS ${preproc_file}
-					COMMENT "test-compiling ${rel_preproc_file} -> ${rel_ll_file}"
-			)
-
-			# ------------------------------------------------------------------
 			# command to generate 'embedded' c file that contains the
 			# preprocessed kernel as a string. execute that from the temp
 			# subdirectory to get the name of the embedded array right - xxd
@@ -218,11 +181,7 @@ MACRO (COMPILE_OPENCL)
 			# kernel
 			# ------------------------------------------------------------------
 
-			IF (INTEL_OPENCL_COMPILER)
-				SET(outputs ${preproc_file} ${deps} ${asm_file} ${ll_file})
-			ELSE()
-				SET(outputs ${preproc_file} ${deps})
-			ENDIF()
+			SET(outputs ${preproc_file} ${deps})
 			FILE(RELATIVE_PATH rel_embedded_file ${CMAKE_CURRENT_BINARY_DIR} ${embedded_file})
 			FILE(RELATIVE_PATH rel_input ${clhelper_base_output_dir} ${preproc_file})
 
