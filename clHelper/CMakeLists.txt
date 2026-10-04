@@ -21,7 +21,6 @@ set_target_properties(clHelperLib PROPERTIES
     EXPORT_NAME dehancer_opencl_helper
     CXX_EXTENSIONS OFF
     CXX_VISIBILITY_PRESET default
-    POSITION_INDEPENDENT_CODE ON
 )
 
 if(WIN32)

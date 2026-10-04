@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 4.3)
 
-project(dehancer_opencl_helper VERSION 0.6.0 LANGUAGES C CXX)
+project(dehancer_opencl_helper VERSION 0.10.0 LANGUAGES C CXX)
 
 include(GNUInstallDirs)
 include(CMakePackageConfigHelpers)
@@ -12,6 +12,8 @@ find_package(OpenCL 3.0 REQUIRED)
 if(WIN32)
     find_package(dlfcn-win32 CONFIG REQUIRED)
 endif()
+
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 add_subdirectory(clHelper)
 include(clHelper/clHelper.cmake)

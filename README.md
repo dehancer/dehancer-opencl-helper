@@ -1,66 +1,26 @@
-# Build and install
+# dehancer-opencl-helper
 
-Requires CMake 4.3+, a C++17 compiler, and OpenCL 3.0 development headers and loader.
-Windows also requires the `dlfcn-win32` CMake package (`dlfcn-win32::dl`).
-macOS uses the SDK's OpenCL framework.
+## Build and install
+
+Requires OpenCL 3.0 development headers and loader. Windows also requires
+the `dlfcn-win32` CMake package (`dlfcn-win32::dl`).
 
 ```sh
-cmake -S . -B build \
-  -DCMAKE_MODULE_PATH=$linux_deps_install_dir/lib/cmake \
-  -DCMAKE_INSTALL_PREFIX=$HOME/dehancer-build \
-  -DCMAKE_BUILD_TYPE=Release
-
+cmake -B build -DCMAKE_BUILD_TYPE=Release
 cmake --build build --parallel $(nproc)
-cmake --install build
+cmake --install build --parallel $(nproc)
 ```
 
-The library remains static, named `clHelperLib`. No dependencies are downloaded.
-Existing `OpenCL::OpenCL` and `dlfcn-win32::dl` targets are reused. Examples are
-opt-in through `OPENCL_BUILD_EXAMPLES`.
+Make sure to set proper `CMAKE_PREFIX_PATH` and `CMAKE_INSTALL_PREFIX` to discover dependencies and install.
 
-`CMAKE_INSTALL_LIBDIR` and `CMAKE_INSTALL_INCLUDEDIR` select subdirectories.
-Relative directories support relocation; absolute overrides remain fixed.
+`CMAKE_POSITION_INDEPENDENT_CODE` is set to `ON`.
 
-# CMake consumption
+The library remains static, named `clHelperLib`.
+Existing `OpenCL::OpenCL` and `dlfcn-win32::dl` targets are reused.
 
-Installed package:
+Examples are opt-in through `OPENCL_BUILD_EXAMPLES`.
 
-```cmake
-find_package(dehancer_opencl_helper CONFIG REQUIRED)
-target_link_libraries(my_library PRIVATE
-    dehancer_opencl_helper::dehancer_opencl_helper
-)
-```
-
-Set `CMAKE_PREFIX_PATH` to the installation prefix.
-
-Source checkout:
-
-```cmake
-add_subdirectory(path/to/dehancer-opencl-helper)
-target_link_libraries(my_library PRIVATE
-    dehancer_opencl_helper::dehancer_opencl_helper
-)
-```
-
-FetchContent with a local checkout:
-
-```cmake
-include(FetchContent)
-FetchContent_Declare(dehancer_opencl_helper
-    SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/vendor/dehancer-opencl-helper"
-)
-FetchContent_MakeAvailable(dehancer_opencl_helper)
-target_link_libraries(my_library PRIVATE
-    dehancer_opencl_helper::dehancer_opencl_helper
-)
-```
-
-The target propagates headers, C++17, `CL_TARGET_OPENCL_VERSION=300`, OpenCL,
-and required loader linkage. Use `PUBLIC` when your public headers expose these
-headers. Include them as `<dehancer/opencl/device.h>`, for example.
-
-# Embedded kernels
+## Embedded kernels
 
 All three modes expose `COMPILE_OPENCL`, `OPENCL_INCLUDE_DIRECTORIES`, and
 `OPENCL_ADD_DEFINITION`. Kernel embedding requires `clang` and `xxd`. These
@@ -74,5 +34,18 @@ target_sources(my_executable PRIVATE ${EMBEDDED_OPENCL_KERNELS})
 
 Kernel symbols must remain visible to `dlsym`. The target propagates executable
 export flags on Linux, FreeBSD, and macOS. Windows consumers must export their
-embedded kernel symbols. The standalone `lib/cmake/clHelper.cmake` installation
-path is retained.
+embedded kernel symbols.
+
+## Usage in CMake
+
+```cmake
+find_package(dehancer_opencl_helper CONFIG REQUIRED)
+target_link_libraries(app PRIVATE dehancer_opencl_helper::dehancer_opencl_helper)
+```
+
+The target propagates headers, `CL_TARGET_OPENCL_VERSION=300`, OpenCL,
+and required loader linkage.
+
+## Original README
+
+See [Original-README.md](Original-README.md).
