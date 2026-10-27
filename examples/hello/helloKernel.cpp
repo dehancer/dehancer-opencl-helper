@@ -70,8 +70,7 @@ int main() {
 	printf("(end sanity)\n");
 
 	/* Create Kernel Program from the source */
-	program = clCreateProgramWithSource(
-	    context, 1, (const char**)&source_str, (const size_t*)&source_size, &ret);
+	program = clCreateProgramWithSource(context, 1, (const char**)&source_str, (const size_t*)&source_size, &ret);
 
 	/* Build Kernel Program */
 	ret = clBuildProgram(program, 1, &device_id, nullptr, nullptr, nullptr);
@@ -102,8 +101,7 @@ int main() {
 	ret = clEnqueueTask(command_queue, kernel, 0, NULL, NULL);
 
 	/* Copy results from the memory buffer */
-	ret = clEnqueueReadBuffer(
-	    command_queue, memobj, CL_TRUE, 0, MEM_SIZE * sizeof(char), string, 0, NULL, NULL);
+	ret = clEnqueueReadBuffer(command_queue, memobj, CL_TRUE, 0, MEM_SIZE * sizeof(char), string, 0, NULL, NULL);
 
 	/* Display Result */
 	puts(string);

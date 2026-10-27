@@ -55,11 +55,10 @@ struct Device : public std::enable_shared_from_this<Device> {
 	double maxClockFrequency{-1.};
 };
 
-std::shared_ptr<Device>
-getDeviceInfo(/*! opencl device ID */
-              cl_device_id clDeviceID,
-              /*! _our_ platform ID (not necessarily same as cl_platform_id */
-              size_t platformID);
+std::shared_ptr<Device> getDeviceInfo(/*! opencl device ID */
+                                      cl_device_id clDeviceID,
+                                      /*! _our_ platform ID (not necessarily same as cl_platform_id */
+                                      size_t platformID);
 
 /*! get a list of all devices found in the system */
 std::vector<std::shared_ptr<Device>> getAllDevices();

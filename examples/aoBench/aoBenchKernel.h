@@ -212,10 +212,7 @@ inline void orthoBasis(struct vec3f basis[3], struct vec3f n) {
 	basis[1] = normalize3f(cross3f(basis[2], basis[0]));
 }
 
-float ambient_occlusion(struct Isect* isect,
-                        struct Plane plane,
-                        struct Sphere spheres[3],
-                        struct RNGState* rngstate) {
+float ambient_occlusion(struct Isect* isect, struct Plane plane, struct Sphere spheres[3], struct RNGState* rngstate) {
 	float eps = 0.0001f;
 	struct vec3f p, n;
 	struct vec3f basis[3];
@@ -272,8 +269,7 @@ __kernel void ao_bench_kernel(int nsubsamples, __write_only image2d_t destinatio
 	int h = get_image_height(destination);
 
 	struct Plane plane = {{0.0f, -0.5f, 0.0f}, {0.f, 1.f, 0.f}};
-	struct Sphere spheres[3] = {
-	    {{-2.0f, 0.0f, -3.5f}, 0.5f}, {{-0.5f, 0.0f, -3.0f}, 0.5f}, {{1.0f, 0.0f, -2.2f}, 0.5f}};
+	struct Sphere spheres[3] = {{{-2.0f, 0.0f, -3.5f}, 0.5f}, {{-0.5f, 0.0f, -3.0f}, 0.5f}, {{1.0f, 0.0f, -2.2f}, 0.5f}};
 	struct RNGState rngstate;
 
 	float invSamples = 1.f / nsubsamples;
@@ -327,8 +323,7 @@ __kernel void ao_bench_kernel(int nsubsamples, __write_only image2d_t destinatio
 	write_imagef(destination, gid, color);
 }
 
-__constant sampler_t sampler =
-    CLK_NORMALIZED_COORDS_TRUE | CLK_ADDRESS_CLAMP_TO_EDGE | CLK_FILTER_LINEAR;
+__constant sampler_t sampler = CLK_NORMALIZED_COORDS_TRUE | CLK_ADDRESS_CLAMP_TO_EDGE | CLK_FILTER_LINEAR;
 
 __kernel void blend_kernel(__read_only image2d_t source, __write_only image2d_t destination) {
 	int2 gid = (int2)(get_global_id(0), get_global_id(1));

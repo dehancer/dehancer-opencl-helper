@@ -6,16 +6,13 @@ extern "C" char exampleKernel_cl[];
 extern "C" unsigned int exampleKernel_cl_len;
 
 namespace dehancer::opencl::example {
-Function::Function(const void* command_queue, const std::string& kernel_name)
-    : command_queue_(command_queue), kernel_name_(kernel_name) {
-	last_error_ = clGetCommandQueueInfo(
-	    get_command_queue(), CL_QUEUE_DEVICE, sizeof(cl_device_id), &device_id_, nullptr);
+Function::Function(const void* command_queue, const std::string& kernel_name) : command_queue_(command_queue), kernel_name_(kernel_name) {
+	last_error_ = clGetCommandQueueInfo(get_command_queue(), CL_QUEUE_DEVICE, sizeof(cl_device_id), &device_id_, nullptr);
 	if (last_error_ != CL_SUCCESS) {
 		throw std::runtime_error("Unable to get OpenCL the device");
 	}
 
-	last_error_ = clGetCommandQueueInfo(
-	    get_command_queue(), CL_QUEUE_CONTEXT, sizeof(cl_context), &context_, nullptr);
+	last_error_ = clGetCommandQueueInfo(get_command_queue(), CL_QUEUE_CONTEXT, sizeof(cl_context), &context_, nullptr);
 	if (last_error_ != CL_SUCCESS) {
 		throw std::runtime_error("Unable to get OpenCL context");
 	}
@@ -27,8 +24,7 @@ Function::Function(const void* command_queue, const std::string& kernel_name)
 	const char* source_str = exampleKernel_cl;
 	size_t source_size = exampleKernel_cl_len;
 
-	program_ = clCreateProgramWithSource(
-	    context_, 1, (const char**)&source_str, (const size_t*)&source_size, &last_error_);
+	program_ = clCreateProgramWithSource(context_, 1, (const char**)&source_str, (const size_t*)&source_size, &last_error_);
 
 	if (last_error_ != CL_SUCCESS) {
 		throw std::runtime_error("Unable to create OpenCL program from exampleKernel.cl");
@@ -45,8 +41,7 @@ Function::Function(const void* command_queue, const std::string& kernel_name)
 		log.resize(log_size);
 
 		// Get the log
-		clGetProgramBuildInfo(
-		    program_, device_id_, CL_PROGRAM_BUILD_LOG, log_size, log.data(), nullptr);
+		clGetProgramBuildInfo(program_, device_id_, CL_PROGRAM_BUILD_LOG, log_size, log.data(), nullptr);
 
 		std::string message = "Unable to build OpenCL program from exampleKernel.cl";
 		message += ": " + kernel_name_;
@@ -101,33 +96,19 @@ void Function::execute(const FunctionHandler& block) {
 
 	size_t localWorkSize[2] = {1, 1};
 
-	clGetKernelWorkGroupInfo(kernel_,
-	                         device_id_,
-	                         CL_KERNEL_WORK_GROUP_SIZE,
-	                         sizeof(localWorkSize),
-	                         localWorkSize,
-	                         nullptr);
+	clGetKernelWorkGroupInfo(kernel_, device_id_, CL_KERNEL_WORK_GROUP_SIZE, sizeof(localWorkSize), localWorkSize, nullptr);
 
 	if (localWorkSize[0] >= texture.width)
 		localWorkSize[0] = texture.width;
 	if (localWorkSize[1] >= texture.height)
 		localWorkSize[1] = texture.height;
 
-	size_t globalWorkSize[2] = {
-	    ((texture.width + localWorkSize[0] - 1) / localWorkSize[0]) * localWorkSize[0],
-	    ((texture.height + localWorkSize[1] - 1) / localWorkSize[1]) * localWorkSize[1]};
+	size_t globalWorkSize[2] = {((texture.width + localWorkSize[0] - 1) / localWorkSize[0]) * localWorkSize[0],
+	                            ((texture.height + localWorkSize[1] - 1) / localWorkSize[1]) * localWorkSize[1]};
 
 	cl_event AlphaComposting12 = nullptr;
 
-	last_error_ = clEnqueueNDRangeKernel(get_command_queue(),
-	                                     kernel_,
-	                                     2,
-	                                     nullptr,
-	                                     globalWorkSize,
-	                                     localWorkSize,
-	                                     0,
-	                                     nullptr,
-	                                     &AlphaComposting12);
+	last_error_ = clEnqueueNDRangeKernel(get_command_queue(), kernel_, 2, nullptr, globalWorkSize, localWorkSize, 0, nullptr, &AlphaComposting12);
 
 	if (last_error_ != CL_SUCCESS) {
 		throw std::runtime_error("Unable to enqueue kernel: " + kernel_name_);

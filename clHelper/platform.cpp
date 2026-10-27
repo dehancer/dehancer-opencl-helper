@@ -32,16 +32,9 @@ Platform::Platform(cl_platform_id clPlatformID,
                    const std::string& profile,
                    const std::string& extensions,
                    const std::vector<std::shared_ptr<Device>>& devices)
-    : devices(devices),
-      clPlatformID(clPlatformID),
-      profile(profile),
-      version(version),
-      vendor(vendor),
-      name(name),
-      extensions(extensions) {}
+    : devices(devices), clPlatformID(clPlatformID), profile(profile), version(version), vendor(vendor), name(name), extensions(extensions) {}
 
-std::vector<std::shared_ptr<Device>> queryDevicesForPlatform(cl_platform_id clPlatformID,
-                                                             size_t platformID) {
+std::vector<std::shared_ptr<Device>> queryDevicesForPlatform(cl_platform_id clPlatformID, size_t platformID) {
 	std::vector<std::shared_ptr<Device>> devices;
 
 	cl_uint numDevices;
@@ -90,13 +83,7 @@ std::shared_ptr<Platform> getPlatformInfo(size_t platformID) {
 	const std::string extensions = buffer;
 
 	// -------------------------------------------------------
-	return std::make_shared<Platform>(clPlatformID,
-	                                  vendor,
-	                                  name,
-	                                  version,
-	                                  profile,
-	                                  extensions,
-	                                  queryDevicesForPlatform(clPlatformID, platformID));
+	return std::make_shared<Platform>(clPlatformID, vendor, name, version, profile, extensions, queryDevicesForPlatform(clPlatformID, platformID));
 }
 
 }  // namespace clHelper

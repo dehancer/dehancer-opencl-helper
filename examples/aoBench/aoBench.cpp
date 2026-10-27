@@ -140,17 +140,7 @@ int run_bench2(int num, const std::shared_ptr<clHelper::Device>& device) {
 	regionst[1] = height;
 	regionst[2] = 1;
 
-	cl_int ret = clEnqueueReadImage(command_queue,
-	                                destination_text.buffer,
-	                                CL_TRUE,
-	                                originst,
-	                                regionst,
-	                                rowPitch,
-	                                slicePitch,
-	                                image.pix,
-	                                0,
-	                                nullptr,
-	                                nullptr);
+	cl_int ret = clEnqueueReadImage(command_queue, destination_text.buffer, CL_TRUE, originst, regionst, rowPitch, slicePitch, image.pix, 0, nullptr, nullptr);
 
 	if (ret != CL_SUCCESS) {
 		throw std::runtime_error("Unable to create texture");

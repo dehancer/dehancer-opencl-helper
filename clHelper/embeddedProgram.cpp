@@ -25,9 +25,7 @@ namespace clHelper {
 
 enum embed_error { embed_fail = 0, kernel_not_found, kernel_size_is_wrong };
 
-extern "C" char* clhGetEmbeddedProgram(const char* fileName,
-                                       size_t* kernelLength,
-                                       embed_error* error) {
+extern "C" char* clhGetEmbeddedProgram(const char* fileName, size_t* kernelLength, embed_error* error) {
 	char kernel_ptr_symbol_name[10000];
 	sprintf(kernel_ptr_symbol_name, "%s", fileName);
 
@@ -103,8 +101,7 @@ std::string getEmbeddedProgram(const std::string& clFileName) {
 				mess = "kernel source size is wrong";
 				break;
 		}
-		throw std::runtime_error("could not find embedded opencl code for '" + clFileName +
-		                         "' error: " + mess);
+		throw std::runtime_error("could not find embedded opencl code for '" + clFileName + "' error: " + mess);
 	}
 
 	std::stringstream ss;

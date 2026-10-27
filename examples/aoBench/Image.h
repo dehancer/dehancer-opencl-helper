@@ -7,8 +7,7 @@
 #include <cstring>
 
 struct Image {
-	Image(size_t _width, size_t _height)
-	    : width(_width), height(_height), length(4 * width * height), pix(new float[length]) {};
+	Image(size_t _width, size_t _height) : width(_width), height(_height), length(4 * width * height), pix(new float[length]) {};
 
 	~Image() {
 		delete[] pix;
