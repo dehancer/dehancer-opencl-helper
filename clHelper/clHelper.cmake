@@ -90,7 +90,6 @@ MACRO (COMPILE_OPENCL)
 		# embedded as a global array of char[]'s
 		SET(embedded_file ${clhelper_output_dir}/${fname}.embedded.c)
 
-
 		IF (ALREADY_COMPILED_${src})
 			# this files is already compiled ... ignore, else we get multiply defined targets
 		ELSE()
@@ -171,7 +170,6 @@ MACRO (COMPILE_OPENCL)
 					DEPENDS ${input_file} ${deps} ${dep_file}
 					COMMENT "Run pre-processor on ${src} -> ${rel_preproc_file}"
 			)
-
 
 			# ------------------------------------------------------------------
 			# command to generate 'embedded' c file that contains the

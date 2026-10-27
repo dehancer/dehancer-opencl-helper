@@ -16,51 +16,51 @@
 
 #pragma once
 
-#include "dehancer/opencl/common.h"
 #include <memory>
+
+#include "dehancer/opencl/common.h"
 
 namespace clHelper {
 
-    std::string clErrorString(cl_int error);
+std::string clErrorString(cl_int error);
 
-    struct DeviceBuffer;
+struct DeviceBuffer;
 
-    /*! C++ wrapper for an OpenCL device object */
-    struct Device : public std::enable_shared_from_this<Device> {
+/*! C++ wrapper for an OpenCL device object */
+struct Device : public std::enable_shared_from_this<Device> {
+	Device(cl_device_id clDeviceID, size_t platformID);
 
-        Device(cl_device_id clDeviceID, size_t platformID);
+	/*! c++ wrappers for opencl buffer objects - not yet implemented */
+	// std::shared_ptr<DeviceBuffer> createRawBuffer(size_t size) { return nullptr; };
 
-        /*! c++ wrappers for opencl buffer objects - not yet implemented */
-        // std::shared_ptr<DeviceBuffer> createRawBuffer(size_t size) { return nullptr; };
+	void print(const std::string& indent = "", std::ostream& out = std::cout);
 
-        void print(const std::string &indent="", std::ostream &out = std::cout);
+	/*! platform that this device is on, in our linear ordering. */
+	const size_t platformID;
 
-        /*! platform that this device is on, in our linear ordering. */
-        const size_t platformID;
+	/*! opencl device id */
+	const cl_device_id clDeviceID;
 
-        /*! opencl device id */
-        const cl_device_id clDeviceID;
+	std::string name;
+	std::string vendor;
+	size_t globalMemSize{(size_t)-1};
+	size_t globalCacheSize{(size_t)-1};
+	size_t cacheLineSize{(size_t)-1};
+	size_t localMemSize{(size_t)-1};
+	size_t maxMemAllocSize{(size_t)-1};
+	size_t maxComputeUnits{(size_t)-1};
+	size_t maxWorkGroupSize{(size_t)-1};
+	size_t vectorWidthInt{(size_t)-1};
 
-        std::string name;
-        std::string vendor;
-        size_t globalMemSize     { (size_t)-1 };
-        size_t globalCacheSize   { (size_t)-1 };
-        size_t cacheLineSize     { (size_t)-1 };
-        size_t localMemSize      { (size_t)-1 };
-        size_t maxMemAllocSize   { (size_t)-1 };
-        size_t maxComputeUnits   { (size_t)-1 };
-        size_t maxWorkGroupSize  { (size_t)-1 };
-        size_t vectorWidthInt    { (size_t)-1 };
+	double maxClockFrequency{-1.};
+};
 
-        double maxClockFrequency { -1. };
-    };
+std::shared_ptr<Device>
+getDeviceInfo(/*! opencl device ID */
+              cl_device_id clDeviceID,
+              /*! _our_ platform ID (not necessarily same as cl_platform_id */
+              size_t platformID);
 
-    std::shared_ptr<Device> getDeviceInfo(/*! opencl device ID */
-            cl_device_id clDeviceID,
-            /*! _our_ platform ID (not necessarily same as cl_platform_id */
-            size_t platformID);
-
-    /*! get a list of all devices found in the system */
-    std::vector<std::shared_ptr<Device>> getAllDevices();
-} // ::clHelper
-
+/*! get a list of all devices found in the system */
+std::vector<std::shared_ptr<Device>> getAllDevices();
+}  // namespace clHelper

@@ -27,18 +27,18 @@
 #include <sys/types.h>
 
 #ifdef __cplusplus
-#  include <string>
+#include <string>
 
 namespace clHelper {
-  /*! get a std::string that contains the embedded OpenCL code. If the
-    given file name couldn't be found among the embedded opencl codes
-    a std::runtime_error will be thrown */
-  std::string getEmbeddedProgram(const std::string &clFileName);
-}
+/*! get a std::string that contains the embedded OpenCL code. If the
+  given file name couldn't be found among the embedded opencl codes
+  a std::runtime_error will be thrown */
+std::string getEmbeddedProgram(const std::string& clFileName);
+}  // namespace clHelper
 
 extern "C" {
 #endif
-  
+
 //  /*! get a pointer to the embedded OpenCL code, as well as the length
 //    of that opencl code (in *kernelLen).  Since the opencl code is
 //    embedded into the program executable the resulting pointer does
@@ -49,8 +49,8 @@ extern "C" {
 //    Usage: If your original opencl file (before embedding) was "src/program.cl"
 //    then that is exactly the string you'll pass to this function.
 //  */
-//char *clhGetEmbeddedProgram(const char *clFileName, size_t *kernelLength);
-  
+// char *clhGetEmbeddedProgram(const char *clFileName, size_t *kernelLength);
+
 #ifdef __cplusplus
 } /* extern C */
 #endif

@@ -44,7 +44,7 @@
   PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
   LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
   NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
-  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.  
+  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 #include <chrono>
@@ -53,151 +53,152 @@
 #ifdef _MSC_VER
 #define _CRT_SECURE_NO_WARNINGS
 #define NOMINMAX
-#pragma warning (disable: 4244)
-#pragma warning (disable: 4305)
+#pragma warning(disable : 4244)
+#pragma warning(disable : 4305)
 #endif
-
 
 #include <cassert>
 #ifdef __linux__
 #include <malloc.h>
 #endif
+#include <algorithm>
 #include <map>
 #include <string>
-#include <algorithm>
 // clhelper
 
-#include "dehancer/opencl/embeddedProgram.h"
-#include "dehancer/opencl/device.h"
-#include "Image.h"
 #include "Function.h"
+#include "Image.h"
+#include "dehancer/opencl/device.h"
+#include "dehancer/opencl/embeddedProgram.h"
 
-#define NSUBSAMPLES     4
+#define NSUBSAMPLES 4
 
 cl_command_queue make_command_queue(const std::shared_ptr<clHelper::Device>& device) {
-  /* Create OpenCL context */
-  cl_int ret;
+	/* Create OpenCL context */
+	cl_int ret;
 
-  cl_device_id device_id = device->clDeviceID;
-  cl_context context = clCreateContext(nullptr, 1, &device_id, nullptr, nullptr, &ret);
+	cl_device_id device_id = device->clDeviceID;
+	cl_context context = clCreateContext(nullptr, 1, &device_id, nullptr, nullptr, &ret);
 
-  /* Create Command Queue */
-  return clCreateCommandQueue(context, device_id, 0, &ret);
+	/* Create Command Queue */
+	return clCreateCommandQueue(context, device_id, 0, &ret);
 }
 
 int run_bench2(int num, const std::shared_ptr<clHelper::Device>& device) {
+	cl_uint width = 800, height = 600;
 
-  cl_uint width = 800, height = 600;
+	Image image(width, height);
 
-  Image image(width, height);
+	auto command_queue = make_command_queue(device);
 
-  auto command_queue = make_command_queue(device);
+	auto bench_kernel = dehancer::opencl::example::Function(command_queue, "ao_bench_kernel");
+	auto ao_bench_text = bench_kernel.make_texture(width / 2, height / 2);
 
-  auto bench_kernel = dehancer::opencl::example::Function(command_queue, "ao_bench_kernel");
-  auto ao_bench_text = bench_kernel.make_texture(width/2,height/2);
+	auto blend_kernel = dehancer::opencl::example::Function(command_queue, "blend_kernel");
+	auto destination_text = blend_kernel.make_texture(width, height);
 
-  auto blend_kernel = dehancer::opencl::example::Function(command_queue, "blend_kernel");
-  auto destination_text = blend_kernel.make_texture(width,height);
+	std::chrono::time_point<std::chrono::system_clock> clock_begin = std::chrono::system_clock::now();
 
-  std::chrono::time_point<std::chrono::system_clock> clock_begin
-          = std::chrono::system_clock::now();
+	bench_kernel.execute([&ao_bench_text](auto kernel) {
+		int numSubSamples = NSUBSAMPLES, count = 0;
 
-  bench_kernel.execute([&ao_bench_text](auto kernel){
-      int numSubSamples = NSUBSAMPLES, count = 0;
+		auto ret = clSetKernelArg(kernel, count++, sizeof(numSubSamples), (void*)&numSubSamples);
+		if (ret != CL_SUCCESS)
+			throw std::runtime_error("Unable to pass to kernel the number of samples");
 
-      auto ret = clSetKernelArg(kernel, count++, sizeof(numSubSamples), (void *)&numSubSamples);
-      if (ret != CL_SUCCESS) throw std::runtime_error("Unable to pass to kernel the number of samples");
+		ret = clSetKernelArg(kernel, count++, sizeof(cl_mem), (void*)&ao_bench_text.buffer);
+		if (ret != CL_SUCCESS)
+			throw std::runtime_error("Unable to pass to kernel the texture buffer");
 
-      ret = clSetKernelArg(kernel, count++, sizeof(cl_mem), (void *)&ao_bench_text.buffer);
-      if (ret != CL_SUCCESS) throw std::runtime_error("Unable to pass to kernel the texture buffer");
+		return ao_bench_text;
+	});
 
-      return ao_bench_text;
-  });
+	blend_kernel.execute([&ao_bench_text, &destination_text](auto kernel) {
+		int count = 0;
 
-  blend_kernel.execute([&ao_bench_text,&destination_text](auto kernel){
-      int count = 0;
+		auto ret = clSetKernelArg(kernel, count++, sizeof(cl_mem), (void*)&ao_bench_text.buffer);
+		if (ret != CL_SUCCESS)
+			throw std::runtime_error("Unable to pass to kernel the source texture buffer");
 
-      auto ret = clSetKernelArg(kernel, count++, sizeof(cl_mem), (void *)&ao_bench_text.buffer);
-      if (ret != CL_SUCCESS) throw std::runtime_error("Unable to pass to kernel the source texture buffer");
+		ret = clSetKernelArg(kernel, count++, sizeof(cl_mem), (void*)&destination_text.buffer);
+		if (ret != CL_SUCCESS)
+			throw std::runtime_error("Unable to pass to kernel the destination texture buffer");
 
-      ret = clSetKernelArg(kernel, count++, sizeof(cl_mem), (void *)&destination_text.buffer);
-      if (ret != CL_SUCCESS) throw std::runtime_error("Unable to pass to kernel the destination texture buffer");
+		return destination_text;
+	});
 
-      return destination_text;
-  });
+	/* Copy results from the memory buffer */
 
-  /* Copy results from the memory buffer */
+	size_t originst[3];
+	size_t regionst[3];
+	size_t rowPitch = 0;
+	size_t slicePitch = 0;
+	originst[0] = 0;
+	originst[1] = 0;
+	originst[2] = 0;
+	regionst[0] = width;
+	regionst[1] = height;
+	regionst[2] = 1;
 
-  size_t originst[3];
-  size_t regionst[3];
-  size_t  rowPitch = 0;
-  size_t  slicePitch = 0;
-  originst[0] = 0; originst[1] = 0; originst[2] = 0;
-  regionst[0] = width; regionst[1] = height; regionst[2] = 1;
+	cl_int ret = clEnqueueReadImage(command_queue,
+	                                destination_text.buffer,
+	                                CL_TRUE,
+	                                originst,
+	                                regionst,
+	                                rowPitch,
+	                                slicePitch,
+	                                image.pix,
+	                                0,
+	                                nullptr,
+	                                nullptr);
 
-  cl_int ret = clEnqueueReadImage(
-          command_queue,
-          destination_text.buffer,
-          CL_TRUE,
-          originst,
-          regionst,
-          rowPitch,
-          slicePitch,
-          image.pix,
-          0,
-          nullptr,
-          nullptr );
+	if (ret != CL_SUCCESS) {
+		throw std::runtime_error("Unable to create texture");
+	}
 
-  if (ret != CL_SUCCESS) {
-    throw std::runtime_error("Unable to create texture");
-  }
+	std::chrono::time_point<std::chrono::system_clock> clock_end = std::chrono::system_clock::now();
+	std::chrono::duration<double> seconds = clock_end - clock_begin;
 
-  std::chrono::time_point<std::chrono::system_clock> clock_end
-          = std::chrono::system_clock::now();
-  std::chrono::duration<double> seconds = clock_end-clock_begin;
+	// Report results and save image
+	std::cout << "[aobench cl]:\t" << seconds.count() << "s "
+	          << ", for a " << width << "x" << height << " pixels" << std::endl;
 
-  // Report results and save image
-  std::cout << "[aobench cl]:\t" << seconds.count() << "s "
-            << ", for a " << width << "x" << height << " pixels" << std::endl;
+	std::string out_file = "ao-cl-";
+	out_file.append(std::to_string(num));
+	out_file.append(".ppm");
 
-  std::string out_file = "ao-cl-"; out_file.append(std::to_string(num)); out_file.append(".ppm");
+	image.savePPM(out_file.c_str());
 
-  image.savePPM(out_file.c_str());
+	dehancer::opencl::example::release(ao_bench_text);
+	dehancer::opencl::example::release(destination_text);
 
-  dehancer::opencl::example::release(ao_bench_text);
-  dehancer::opencl::example::release(destination_text);
-
-  return 0;
+	return 0;
 }
 
-int main(int argc, char **argv)
-{
+int main(int argc, char** argv) {
+	try {
+		std::vector<std::shared_ptr<clHelper::Device>> devices = clHelper::getAllDevices();
 
-  try {
-    std::vector<std::shared_ptr<clHelper::Device>> devices
-            = clHelper::getAllDevices();
+		std::shared_ptr<clHelper::Device> device;
 
-    std::shared_ptr<clHelper::Device> device;
+		assert(!devices.empty());
 
-    assert(!devices.empty());
+		int dev_num = 0;
+		std::cout << "Info: " << std::endl;
+		for (auto d : devices) {
+			std::cout << " #" << dev_num++ << std::endl;
+			d->print(" ", std::cout);
+		}
 
-    int dev_num = 0;
-    std::cout << "Info: " << std::endl;
-    for (auto d: devices) {
-      std::cout << " #" << dev_num++ << std::endl;
-      d->print(" ", std::cout);
-    }
-
-    std::cout << "Bench: " << std::endl;
-    dev_num = 0;
-    for (auto d: devices) {
-      if (run_bench2(dev_num++, d)!=0) return -1;
-    }
-    return 0;
-  }
-  catch (const std::runtime_error &e) {
-    std::cerr << "Error: " << e.what() << std::endl;
-    return -1;
-  }
-
+		std::cout << "Bench: " << std::endl;
+		dev_num = 0;
+		for (auto d : devices) {
+			if (run_bench2(dev_num++, d) != 0)
+				return -1;
+		}
+		return 0;
+	} catch (const std::runtime_error& e) {
+		std::cerr << "Error: " << e.what() << std::endl;
+		return -1;
+	}
 }
