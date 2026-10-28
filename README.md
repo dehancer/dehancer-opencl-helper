@@ -70,7 +70,11 @@ find_package(dehancer_opencl_helper CONFIG REQUIRED)
 target_link_libraries(app PRIVATE dehancer_opencl_helper::dehancer_opencl_helper)
 ```
 
-The target propagates headers, `CL_TARGET_OPENCL_VERSION=300`, OpenCL,
+Set `-DOPENCL=300` (default) or `-DOPENCL=120` on the CMake command line to
+select the target version. This sets `CL_TARGET_OPENCL_VERSION` and the kernel
+preprocessor flag (`-cl-std=CL3.0` or `-cl-std=CL1.2`).
+
+The target propagates headers, `CL_TARGET_OPENCL_VERSION=${OPENCL}`, OpenCL,
 and required loader linkage.
 
 ## Original README

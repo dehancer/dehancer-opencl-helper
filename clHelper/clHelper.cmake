@@ -14,6 +14,17 @@
 # // limitations under the License.                                           # //
 # // ======================================================================== # //
 
+set(OPENCL "300" CACHE STRING "OpenCL target version (120 or 300)")
+set_property(CACHE OPENCL PROPERTY STRINGS 120 300)
+
+if(OPENCL STREQUAL "120")
+    set(CLHELPER_OPENCL_STANDARD "CL1.2")
+elseif(OPENCL STREQUAL "300")
+    set(CLHELPER_OPENCL_STANDARD "CL3.0")
+else()
+    message(FATAL_ERROR "Unsupported OPENCL version: ${OPENCL}. Use 120 or 300.")
+endif()
+
 # ------------------------------------------------------------------
 # list of all directories the user specified for his opencl kernels
 # (using OPENCL_INCLUDE_DIRECTORIES(<dir>)
@@ -161,7 +172,7 @@ MACRO (COMPILE_OPENCL)
 
 			ADD_CUSTOM_COMMAND(
 					OUTPUT ${preproc_file}
-					COMMAND ${CLANG_COMPILER} -E -DCLANG_OPENCL -DCLANG_OPENCL_PREPROC=1 -cl-std=CL3.0 ${CLHELPER_NO_STDINC} -DCL_TARGET_OPENCL_VERSION=300
+					COMMAND ${CLANG_COMPILER} -E -DCLANG_OPENCL -DCLANG_OPENCL_PREPROC=1 -cl-std=${CLHELPER_OPENCL_STANDARD} ${CLHELPER_NO_STDINC} -DCL_TARGET_OPENCL_VERSION=${OPENCL}
 					${CLHELPER_INCLUDE_DIRS}
 					${CLHELPER_DEFINITIONS}
 					${OPENCL_DEFINITIONS}
