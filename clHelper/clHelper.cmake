@@ -14,15 +14,15 @@
 # // limitations under the License.                                           # //
 # // ======================================================================== # //
 
-set(OPENCL "300" CACHE STRING "OpenCL target version (120 or 300)")
-set_property(CACHE OPENCL PROPERTY STRINGS 120 300)
+set(OPENCL_VERSION "300" CACHE STRING "OpenCL target version (120 or 300)")
+set_property(CACHE OPENCL_VERSION PROPERTY STRINGS 120 300)
 
-if(OPENCL STREQUAL "120")
+if(OPENCL_VERSION STREQUAL "120")
     set(CLHELPER_OPENCL_STANDARD "CL1.2")
-elseif(OPENCL STREQUAL "300")
+elseif(OPENCL_VERSION STREQUAL "300")
     set(CLHELPER_OPENCL_STANDARD "CL3.0")
 else()
-    message(FATAL_ERROR "Unsupported OPENCL version: ${OPENCL}. Use 120 or 300.")
+    message(FATAL_ERROR "Unsupported OPENCL version: ${OPENCL_VERSION}. Use 120 or 300.")
 endif()
 
 # ------------------------------------------------------------------
@@ -172,7 +172,7 @@ MACRO (COMPILE_OPENCL)
 
 			ADD_CUSTOM_COMMAND(
 					OUTPUT ${preproc_file}
-					COMMAND ${CLANG_COMPILER} -E -DCLANG_OPENCL -DCLANG_OPENCL_PREPROC=1 -cl-std=${CLHELPER_OPENCL_STANDARD} ${CLHELPER_NO_STDINC} -DCL_TARGET_OPENCL_VERSION=${OPENCL}
+					COMMAND ${CLANG_COMPILER} -E -DCLANG_OPENCL -DCLANG_OPENCL_PREPROC=1 -cl-std=${CLHELPER_OPENCL_STANDARD} ${CLHELPER_NO_STDINC} -DCL_TARGET_OPENCL_VERSION=${OPENCL_VERSION}
 					${CLHELPER_INCLUDE_DIRS}
 					${CLHELPER_DEFINITIONS}
 					${OPENCL_DEFINITIONS}

@@ -6,7 +6,7 @@ Requires OpenCL 3.0 development headers and loader. Windows also requires
 the `dlfcn-win32` CMake package (`dlfcn-win32::dl`).
 
 ```sh
-cmake -B build -DCMAKE_BUILD_TYPE=Release
+cmake -B build -DCMAKE_BUILD_TYPE=Release -DOPENCL_VERSION=300
 cmake --build build --parallel $(nproc)
 cmake --install build --parallel $(nproc)
 ```
@@ -19,6 +19,9 @@ The library remains static, named `clHelperLib`.
 Existing `OpenCL::OpenCL` and `dlfcn-win32::dl` targets are reused.
 
 Examples are opt-in through `OPENCL_BUILD_EXAMPLES`.
+
+Set `-DOPENCL_VERSION=300` (default) or `-DOPENCL_VERSION=120` on the CMake command
+line to select the OpenCL version.
 
 ## Windows build
 
@@ -69,14 +72,3 @@ embedded kernel symbols.
 find_package(dehancer_opencl_helper CONFIG REQUIRED)
 target_link_libraries(app PRIVATE dehancer_opencl_helper::dehancer_opencl_helper)
 ```
-
-Set `-DOPENCL=300` (default) or `-DOPENCL=120` on the CMake command line to
-select the target version. This sets `CL_TARGET_OPENCL_VERSION` and the kernel
-preprocessor flag (`-cl-std=CL3.0` or `-cl-std=CL1.2`).
-
-The target propagates headers, `CL_TARGET_OPENCL_VERSION=${OPENCL}`, OpenCL,
-and required loader linkage.
-
-## Original README
-
-See [Original-README.md](Original-README.md).
