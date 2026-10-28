@@ -15,8 +15,8 @@ endif()
 
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
-add_subdirectory(clHelper)
 include(clHelper/clHelper.cmake)
+add_subdirectory(clHelper)
 
 set(dehancer_opencl_helper_cmake_install_dir "${CMAKE_INSTALL_LIBDIR}/cmake/dehancer_opencl_helper")
 configure_package_config_file(
