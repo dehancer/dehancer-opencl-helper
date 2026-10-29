@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 4.3)
 
-project(dehancer_opencl_helper VERSION 0.10.0 LANGUAGES C CXX)
+project(dehancer_opencl_helper VERSION 0.40.0 LANGUAGES C CXX)
 
 include(GNUInstallDirs)
 include(CMakePackageConfigHelpers)
